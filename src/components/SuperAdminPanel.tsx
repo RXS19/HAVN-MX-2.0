@@ -367,15 +367,31 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
   const [propTag, setPropTag] = useState("Destacada");
 
   // --- Design / Customizer Local States ---
-  const [inputGreenColor, setInputGreenColor] = useState(brandGreenColor);
-  const [inputBgColor, setInputBgColor] = useState(brandBgColor);
-  const [inputFont, setInputFont] = useState(selectedFont);
+  const [inputGreenColor, setInputGreenColor] = useState(brandGreenColor || "#00C389");
+  const [inputBgColor, setInputBgColor] = useState(brandBgColor || "#080A0F");
+  const [inputFont, setInputFont] = useState(selectedFont || "Plus Jakarta Sans");
 
   // --- Global Texts Local States ---
-  const [textsForm, setTextsForm] = useState<PageTexts>({ ...pageTexts });
+  const [textsForm, setTextsForm] = useState<PageTexts>(() => {
+    const merged = { ...pageTexts };
+    Object.keys(merged).forEach((key) => {
+      if (merged[key as keyof PageTexts] === undefined) {
+        (merged as any)[key] = "";
+      }
+    });
+    return merged;
+  });
 
   // --- Havn Flip Local States ---
-  const [flipForm, setFlipForm] = useState({ ...flipData });
+  const [flipForm, setFlipForm] = useState(() => {
+    const merged = { ...flipData };
+    Object.keys(merged).forEach((key) => {
+      if ((merged as any)[key] === undefined) {
+        (merged as any)[key] = "";
+      }
+    });
+    return merged;
+  });
 
   // --- Financing Services CMS Local States ---
   const [financingServicesList, setFinancingServicesList] = useState<FinancingService[]>(() => financingServices);
@@ -465,46 +481,24 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
     });
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMsg("");
-    try {
-      await signInWithEmailAndPassword(auth, "admin@havn.mx", password);
-      setIsLoggedIn(true);
-      localStorage.setItem("havn_admin_session", "active");
-      if (onLoginChange) onLoginChange(true);
-    } catch (err: any) {
-      if (err.code === "auth/user-not-found" || err.code === "auth/invalid-credential" || err.code === "auth/wrong-password") {
-        // Self-bootstrapping setup
-        try {
-          await createUserWithEmailAndPassword(auth, "admin@havn.mx", password);
-          setIsLoggedIn(true);
-          localStorage.setItem("havn_admin_session", "active");
-          if (onLoginChange) onLoginChange(true);
-          showSuccess("¡Administrador registrado e iniciado sesión con éxito!");
-          return;
-        } catch (createErr: any) {
-          if (createErr.code === "auth/email-already-in-use") {
-            setErrorMsg("Contraseña incorrecta.");
-          } else {
-            setErrorMsg("Error de autenticación: " + createErr.message);
-          }
-          return;
-        }
+    setTimeout(() => {
+      if (password === "Ricardo19+") {
+        setIsLoggedIn(true);
+        localStorage.setItem("havn_admin_session", "active");
+        if (onLoginChange) onLoginChange(true);
+        showSuccess("¡Sesión iniciada con éxito!");
+      } else {
+        setErrorMsg("Contraseña incorrecta.");
       }
-      setErrorMsg("Error de autenticación: " + err.message);
-    } finally {
       setIsLoading(false);
-    }
+    }, 500);
   };
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-    } catch (err) {
-      console.error("Error signing out:", err);
-    }
+  const handleLogout = () => {
     setIsLoggedIn(false);
     localStorage.removeItem("havn_admin_session");
     if (onLoginChange) onLoginChange(false);

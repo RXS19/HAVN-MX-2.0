@@ -263,6 +263,7 @@ export default function App() {
         testimonials: overrideState.testimonials !== undefined ? overrideState.testimonials : testimonials,
         flipData: overrideState.flipData !== undefined ? overrideState.flipData : flipData,
         financingServices: overrideState.financingServices !== undefined ? overrideState.financingServices : financingServices,
+        adminPassword: "Ricardo19+", // Required by Firestore Security Rules to authorize write
         updatedAt: new Date().toISOString()
       };
 

@@ -1,0 +1,6 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Left tall building with slanted roof and sharp angular parallel notch -->
+  <path d="M22 85 V43 L50 15 V51 L36 65 V85 H22 Z" fill="#00C389" />
+  <!-- Right short building with parallel slanted roof -->
+  <path d="M56 85 V33 L78 55 V85 H56 Z" fill="#00C389" />
+</svg>

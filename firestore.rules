@@ -9,13 +9,13 @@ service cloud.firestore {
     // Global settings and properties CMS document
     match /settings/main {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if request.resource.data.adminPassword == "Ricardo19+";
     }
 
     // Contact submissions leads collection
     match /leads/{leadId} {
       allow create: if true; // Open to the public for submissions
-      allow read, delete: if request.auth != null; // Restrict reading and deleting to authenticated admins
+      allow read, delete: if true; // Open for dashboard visualization
     }
   }
 }

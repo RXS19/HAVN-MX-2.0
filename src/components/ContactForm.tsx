@@ -78,6 +78,43 @@ Este lead ha sido registrado automáticamente en la plataforma de administració
         createdAt: new Date().toISOString()
       });
 
+      // Submit to HubSpot if keys are available
+      const portalId = (import.meta as any).env.VITE_HUBSPOT_PORTAL_ID;
+      const formGuid = (import.meta as any).env.VITE_HUBSPOT_FORM_GUID;
+      
+      if (portalId && formGuid) {
+        // Extract HubSpot tracking UTK from cookie if present
+        const hutk = document.cookie.match(/hubspotutk=([^;]+)/)?.[1];
+        
+        const payload = {
+          fields: [
+            { name: "firstname", value: name },
+            { name: "email", value: email },
+            { name: "phone", value: phone },
+            { name: "intent", value: intent === "buy" ? "Quiero comprar (Comprador)" : "Quiero vender (Vendedor)" },
+            { name: "budget", value: budget || "No especificado" },
+            { name: "message", value: `Interés: ${intent === "buy" ? "Quiero comprar" : "Quiero vender"}. Presupuesto/Valor: ${budget || "No especificado"}. Código: HAVN-SERIEA-992` }
+          ],
+          context: {
+            hutk,
+            pageUri: window.location.href,
+            pageName: document.title
+          }
+        };
+
+        try {
+          await fetch(`https://api.hsforms.com/submissions/v3/integration/submit/${portalId}/${formGuid}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+          });
+        } catch (hsError) {
+          console.error("Error submitting to HubSpot Forms API:", hsError);
+        }
+      }
+
       // Show success screen and let user trigger instant WhatsApp / email actions
       setIsSubmitting(false);
       setIsSubmitted(true);
@@ -203,11 +240,15 @@ Este lead ha sido registrado automáticamente en la plataforma de administració
                     {/* Inputs */}
                     <div className="space-y-4 pt-2">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Hidden input to allow HubSpot external forms scraper to read intent selection */}
+                        <input type="hidden" name="intent" value={intent === "buy" ? "Quiero comprar (Comprador)" : "Quiero vender (Vendedor)"} />
+
                         {/* Name */}
                         <div className="space-y-1.5">
                           <label className="text-xs font-extrabold text-[#080A0F] uppercase tracking-wider">Nombre Completo</label>
                           <input
                             type="text"
+                            name="firstname"
                             required
                             placeholder="Ej. Sofía Pérez"
                             value={name}
@@ -221,6 +262,7 @@ Este lead ha sido registrado automáticamente en la plataforma de administració
                           <label className="text-xs font-extrabold text-[#080A0F] uppercase tracking-wider">Teléfono de contacto</label>
                           <input
                             type="tel"
+                            name="phone"
                             required
                             placeholder="Ej. 55 1234 5678"
                             value={phone}
@@ -235,6 +277,7 @@ Este lead ha sido registrado automáticamente en la plataforma de administració
                         <label className="text-xs font-extrabold text-[#080A0F] uppercase tracking-wider">Correo Electrónico</label>
                         <input
                           type="email"
+                          name="email"
                           required
                           placeholder="Ej. sofia.perez@empresa.com"
                           value={email}
@@ -249,6 +292,7 @@ Este lead ha sido registrado automáticamente en la plataforma de administració
                           {intent === "buy" ? "Presupuesto Estimado" : "Valor Estimado de tu Propiedad"}
                         </label>
                         <select
+                          name="budget"
                           value={budget}
                           onChange={(e) => setBudget(e.target.value)}
                           className="w-full bg-slate-50 border border-gray-200 focus:border-brand-green/60 rounded-xl px-4 py-3 text-sm text-brand-bg focus:outline-none transition-colors cursor-pointer"
