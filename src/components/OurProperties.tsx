@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, SlidersHorizontal, Heart, Bed, ShowerHead, Square, Sparkles, MapPin, ArrowUpDown, RefreshCw, Trash2, Edit } from "lucide-react";
+import { Search, SlidersHorizontal, Heart, Bed, ShowerHead, Square, Sparkles, MapPin, ArrowUpDown, RefreshCw, Trash2, Edit, Car } from "lucide-react";
 import { Property } from "../types";
 import { PROPERTIES } from "../data";
 
@@ -467,7 +467,7 @@ export const OurProperties: React.FC<OurPropertiesProps> = ({
                 </div>
 
                 {/* Technical specs bottom bar */}
-                <div className="px-6 pb-6 pt-4 border-t border-gray-50 grid grid-cols-3 gap-2 text-[11px] text-gray-500 font-semibold bg-slate-50/50 rounded-b-[24px]">
+                <div className="px-4 pb-6 pt-4 border-t border-gray-50 grid grid-cols-4 gap-1.5 text-[11px] text-gray-500 font-semibold bg-slate-50/50 rounded-b-[24px]">
                   <div className="flex items-center gap-1.5 justify-center py-1.5 bg-white border border-gray-100 rounded-lg">
                     <Bed className="w-3.5 h-3.5 text-gray-400" />
                     <span>{prop.beds} recs</span>
@@ -479,6 +479,10 @@ export const OurProperties: React.FC<OurPropertiesProps> = ({
                   <div className="flex items-center gap-1.5 justify-center py-1.5 bg-white border border-gray-100 rounded-lg">
                     <Square className="w-3 h-3 text-gray-400" />
                     <span>{prop.sqm} m²</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 justify-center py-1.5 bg-white border border-gray-100 rounded-lg">
+                    <Car className="w-3.5 h-3.5 text-gray-400" />
+                    <span>{prop.parking || 2} est</span>
                   </div>
                 </div>
               </motion.div>

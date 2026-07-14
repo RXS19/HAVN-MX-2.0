@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "motion/react";
-import { Heart, Bed, ShowerHead, Square, Star, Shield, TrendingUp, Sparkles, Building, ArrowUpRight, MapPin, Trash2, Edit } from "lucide-react";
+import { Heart, Bed, ShowerHead, Square, Star, Shield, TrendingUp, Sparkles, Building, ArrowUpRight, MapPin, Trash2, Edit, Car } from "lucide-react";
 import { Property } from "../types";
 import { PROPERTIES } from "../data";
 
@@ -203,18 +203,22 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
                   </div>
 
                   {/* Technical Specs */}
-                  <div className="mt-6 pt-4 border-t border-gray-100 grid grid-cols-3 gap-2 text-xs text-gray-500 font-semibold">
-                    <div className="flex items-center gap-1.5 justify-center py-1 bg-slate-50 rounded-lg">
-                      <Bed className="w-4 h-4 text-gray-400" />
+                  <div className="mt-6 pt-4 border-t border-gray-100 grid grid-cols-4 gap-1.5 text-[11px] text-gray-500 font-semibold">
+                    <div className="flex items-center gap-1 justify-center py-1 bg-slate-50 rounded-lg">
+                      <Bed className="w-3.5 h-3.5 text-gray-400" />
                       <span>{prop.beds} Recs</span>
                     </div>
-                    <div className="flex items-center gap-1.5 justify-center py-1 bg-slate-50 rounded-lg">
-                      <ShowerHead className="w-4 h-4 text-gray-400" />
+                    <div className="flex items-center gap-1 justify-center py-1 bg-slate-50 rounded-lg">
+                      <ShowerHead className="w-3.5 h-3.5 text-gray-400" />
                       <span>{prop.baths} Baños</span>
                     </div>
-                    <div className="flex items-center gap-1.5 justify-center py-1 bg-slate-50 rounded-lg">
-                      <Square className="w-3.5 h-3.5 text-gray-400" />
+                    <div className="flex items-center gap-1 justify-center py-1 bg-slate-50 rounded-lg">
+                      <Square className="w-3 h-3 text-gray-400" />
                       <span>{prop.sqm} m²</span>
+                    </div>
+                    <div className="flex items-center gap-1 justify-center py-1 bg-slate-50 rounded-lg">
+                      <Car className="w-3.5 h-3.5 text-gray-400" />
+                      <span>{prop.parking || 2} Estac.</span>
                     </div>
                   </div>
                 </div>

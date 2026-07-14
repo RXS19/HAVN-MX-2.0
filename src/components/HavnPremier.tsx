@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "motion/react";
-import { Heart, Bed, ShowerHead, Square, Sparkles, MapPin, Trash2, Edit } from "lucide-react";
+import { Heart, Bed, ShowerHead, Square, Sparkles, MapPin, Trash2, Edit, Car } from "lucide-react";
 import { Property } from "../types";
 
 interface HavnPremierProps {
@@ -178,18 +178,22 @@ export const HavnPremier: React.FC<HavnPremierProps> = ({
               </div>
 
               {/* Technical Specs */}
-              <div className="px-6 pb-6 pt-4 border-t border-white/5 grid grid-cols-3 gap-2 text-xs text-gray-300 font-semibold bg-white/[0.01] rounded-b-[24px]">
-                <div className="flex items-center gap-1.5 justify-center py-2 bg-white/[0.02] border border-white/5 rounded-xl">
-                  <Bed className="w-4 h-4 text-brand-green" />
+              <div className="px-4 pb-6 pt-4 border-t border-white/5 grid grid-cols-4 gap-1.5 text-[11px] text-gray-300 font-semibold bg-white/[0.01] rounded-b-[24px]">
+                <div className="flex items-center gap-1 justify-center py-2 bg-white/[0.02] border border-white/5 rounded-xl">
+                  <Bed className="w-3.5 h-3.5 text-brand-green" />
                   <span>{prop.beds} Recs</span>
                 </div>
-                <div className="flex items-center gap-1.5 justify-center py-2 bg-white/[0.02] border border-white/5 rounded-xl">
-                  <ShowerHead className="w-4 h-4 text-brand-green" />
+                <div className="flex items-center gap-1 justify-center py-2 bg-white/[0.02] border border-white/5 rounded-xl">
+                  <ShowerHead className="w-3.5 h-3.5 text-brand-green" />
                   <span>{prop.baths} Baños</span>
                 </div>
-                <div className="flex items-center gap-1.5 justify-center py-2 bg-white/[0.02] border border-white/5 rounded-xl">
-                  <Square className="w-3.5 h-3.5 text-brand-green" />
+                <div className="flex items-center gap-1 justify-center py-2 bg-white/[0.02] border border-white/5 rounded-xl">
+                  <Square className="w-3 h-3 text-brand-green" />
                   <span>{prop.sqm} m²</span>
+                </div>
+                <div className="flex items-center gap-1 justify-center py-2 bg-white/[0.02] border border-white/5 rounded-xl">
+                  <Car className="w-3.5 h-3.5 text-brand-green" />
+                  <span>{prop.parking || 2} Estac.</span>
                 </div>
               </div>
             </motion.div>

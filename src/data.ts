@@ -11,6 +11,7 @@ export const PROPERTIES: Property[] = [
     beds: 3,
     baths: 3.5,
     sqm: 340,
+    parking: 3,
     image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
@@ -31,6 +32,7 @@ export const PROPERTIES: Property[] = [
     beds: 4,
     baths: 5,
     sqm: 680,
+    parking: 4,
     image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
@@ -51,6 +53,7 @@ export const PROPERTIES: Property[] = [
     beds: 2,
     baths: 2.5,
     sqm: 185,
+    parking: 2,
     image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
@@ -70,6 +73,7 @@ export const PROPERTIES: Property[] = [
     beds: 5,
     baths: 6,
     sqm: 850,
+    parking: 5,
     image: "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1200&q=80",
@@ -89,6 +93,7 @@ export const PROPERTIES: Property[] = [
     beds: 3,
     baths: 3.5,
     sqm: 290,
+    parking: 3,
     image: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80",
@@ -108,6 +113,7 @@ export const PROPERTIES: Property[] = [
     beds: 1,
     baths: 1.5,
     sqm: 110,
+    parking: 1,
     image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
@@ -127,6 +133,7 @@ export const PROPERTIES: Property[] = [
     beds: 3,
     baths: 3.5,
     sqm: 260,
+    parking: 2,
     image: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80",
@@ -146,6 +153,7 @@ export const PROPERTIES: Property[] = [
     beds: 4,
     baths: 4.5,
     sqm: 520,
+    parking: 3,
     image: "https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?auto=format&fit=crop&w=1200&q=80",
@@ -165,6 +173,7 @@ export const PROPERTIES: Property[] = [
     beds: 2,
     baths: 2,
     sqm: 160,
+    parking: 2,
     image: "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=1200&q=80",
@@ -184,6 +193,7 @@ export const PROPERTIES: Property[] = [
     beds: 4,
     baths: 4.5,
     sqm: 480,
+    parking: 4,
     image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",

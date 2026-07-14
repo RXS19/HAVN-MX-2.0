@@ -8,6 +8,8 @@ export interface Property {
   beds: number;
   baths: number;
   sqm: number;
+  parking: number;
+  description?: string;
   image: string;
   images?: string[];
   tag?: string;

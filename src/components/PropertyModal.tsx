@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, Bed, ShowerHead, Square, MapPin, Landmark, Calendar, Phone, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, Bed, ShowerHead, Square, MapPin, Landmark, Calendar, Phone, Sparkles, ChevronLeft, ChevronRight, Car } from "lucide-react";
 import { Property } from "../types";
 
 interface PropertyModalProps {
@@ -160,26 +160,33 @@ export const PropertyModal: React.FC<PropertyModalProps> = ({
               </div>
 
               {/* Specs */}
-              <div className="grid grid-cols-3 gap-3 text-center border-y border-gray-100 py-4">
+              <div className="grid grid-cols-4 gap-2 text-center border-y border-gray-100 py-4">
                 <div>
-                  <span className="text-gray-400 font-bold text-[10px] uppercase tracking-wider block mb-1">Habitaciones</span>
-                  <div className="flex items-center justify-center gap-1.5 text-sm font-bold text-[#080A0F]">
-                    <Bed className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-400 font-bold text-[9px] uppercase tracking-wider block mb-1">Habitaciones</span>
+                  <div className="flex items-center justify-center gap-1 text-xs md:text-sm font-bold text-[#080A0F]">
+                    <Bed className="w-3.5 h-3.5 text-gray-500" />
                     <span>{property.beds}</span>
                   </div>
                 </div>
                 <div>
-                  <span className="text-gray-400 font-bold text-[10px] uppercase tracking-wider block mb-1">Baños</span>
-                  <div className="flex items-center justify-center gap-1.5 text-sm font-bold text-[#080A0F]">
-                    <ShowerHead className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-400 font-bold text-[9px] uppercase tracking-wider block mb-1">Baños</span>
+                  <div className="flex items-center justify-center gap-1 text-xs md:text-sm font-bold text-[#080A0F]">
+                    <ShowerHead className="w-3.5 h-3.5 text-gray-500" />
                     <span>{property.baths}</span>
                   </div>
                 </div>
                 <div>
-                  <span className="text-gray-400 font-bold text-[10px] uppercase tracking-wider block mb-1">Área</span>
-                  <div className="flex items-center justify-center gap-1.5 text-sm font-bold text-[#080A0F]">
-                    <Square className="w-3.5 h-3.5 text-gray-500" />
+                  <span className="text-gray-400 font-bold text-[9px] uppercase tracking-wider block mb-1">Área</span>
+                  <div className="flex items-center justify-center gap-1 text-xs md:text-sm font-bold text-[#080A0F]">
+                    <Square className="w-3 h-3 text-gray-500" />
                     <span>{property.sqm} m²</span>
+                  </div>
+                </div>
+                <div>
+                  <span className="text-gray-400 font-bold text-[9px] uppercase tracking-wider block mb-1">Cajones</span>
+                  <div className="flex items-center justify-center gap-1 text-xs md:text-sm font-bold text-[#080A0F]">
+                    <Car className="w-3.5 h-3.5 text-gray-500" />
+                    <span>{property.parking || 2}</span>
                   </div>
                 </div>
               </div>
@@ -188,7 +195,7 @@ export const PropertyModal: React.FC<PropertyModalProps> = ({
               <div className="space-y-3">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-[#080A0F]">Descripción de Autor</h4>
                 <p className="text-xs text-gray-500 leading-relaxed font-medium">
-                  Ubicado en una de las zonas con mayor exclusividad y plusvalía en {property.city}. Esta residencia de diseño contemporáneo cuenta con acabados premium cuidadosamente seleccionados, iluminación inteligente integrada, amplias terrazas, y una distribución de espacio impecable orientada al confort y la elegancia.
+                  {property.description || `Ubicado en una de las zonas con mayor exclusividad y plusvalía en ${property.city}. Esta residencia de diseño contemporáneo cuenta con acabados premium cuidadosamente seleccionados, iluminación inteligente integrada, amplias terrazas, y una distribución de espacio impecable orientada al confort y la elegancia.`}
                 </p>
               </div>
 

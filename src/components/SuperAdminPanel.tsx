@@ -367,6 +367,8 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
   const [propBeds, setPropBeds] = useState("2");
   const [propBaths, setPropBaths] = useState("2");
   const [propSqm, setPropSqm] = useState("120");
+  const [propParking, setPropParking] = useState("2");
+  const [propDescription, setPropDescription] = useState("");
   const [propImage, setPropImage] = useState("");
   const [propImagesText, setPropImagesText] = useState("");
   const [propImages, setPropImages] = useState<string[]>([]);
@@ -564,6 +566,8 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
     setPropBeds(prop.beds.toString());
     setPropBaths(prop.baths.toString());
     setPropSqm(prop.sqm.toString());
+    setPropParking((prop.parking || 2).toString());
+    setPropDescription(prop.description || "");
     setPropImage(prop.image);
     setPropImages(prop.images || [prop.image]);
     setPropImagesText(prop.images ? prop.images.join(", ") : "");
@@ -584,6 +588,8 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
     setPropBeds("2");
     setPropBaths("2");
     setPropSqm("120");
+    setPropParking("2");
+    setPropDescription("");
     setPropImage("");
     setPropImages([]);
     setPropImagesText("");
@@ -645,6 +651,8 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
       beds: parseInt(propBeds, 10) || 2,
       baths: parseFloat(propBaths) || 2,
       sqm: parseInt(propSqm, 10) || 120,
+      parking: parseInt(propParking, 10) || 2,
+      description: propDescription || undefined,
       image: propImage,
       images: additionalImages,
       tag: propTag || undefined,
@@ -1229,7 +1237,7 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
                           <div>
                             <label className="text-xs text-gray-400 block mb-1 font-semibold">Ciudad</label>
                             <select
@@ -1272,6 +1280,15 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
                             />
                           </div>
                           <div>
+                            <label className="text-xs text-gray-400 block mb-1 font-semibold">Estacionamiento</label>
+                            <input
+                              type="number"
+                              value={propParking}
+                              onChange={(e) => setPropParking(e.target.value)}
+                              className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-xs focus:ring-1 focus:ring-brand-green outline-none"
+                            />
+                          </div>
+                          <div>
                             <label className="text-xs text-gray-400 block mb-1 font-semibold">Tag Distintivo</label>
                             <input
                               type="text"
@@ -1301,6 +1318,17 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
                             placeholder="https://images.unsplash.com/photo-..."
                             className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-xs focus:ring-1 focus:ring-brand-green outline-none"
                             required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs text-gray-400 block mb-1 font-semibold">Descripción de la Propiedad</label>
+                          <textarea
+                            value={propDescription}
+                            onChange={(e) => setPropDescription(e.target.value)}
+                            placeholder="Ej. Hermoso departamento con acabados de lujo, vista espectacular y amplios espacios iluminados..."
+                            rows={3}
+                            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-xs focus:ring-1 focus:ring-brand-green outline-none resize-none"
                           />
                         </div>
 
@@ -1520,7 +1548,7 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
                                   <span className="text-[10px] text-gray-500 block">{p.city}</span>
                                 </td>
                                 <td className="p-4 text-gray-400">
-                                  {p.beds} Rec • {p.baths} Baños • {p.sqm} m²
+                                  {p.beds} Rec • {p.baths} Baños • {p.sqm} m² • {p.parking || 2} Estac.
                                 </td>
                                 <td className="p-4">
                                   <span className="bg-brand-green/10 text-brand-green border border-brand-green/20 px-2 py-0.5 rounded text-[10px] font-bold">
