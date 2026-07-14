@@ -255,6 +255,9 @@ export default function App() {
     const isAdmin = localStorage.getItem("havn_admin_session") === "active";
     if (!isAdmin) return;
 
+    setFirestoreStatus("saving");
+    setFirestoreError(null);
+
     try {
       const merged = {
         properties: overrideState.properties !== undefined ? overrideState.properties : properties,
@@ -291,8 +294,14 @@ export default function App() {
       const docRef = doc(db, "settings", "main");
       await setDoc(docRef, sanitizedMerged);
       console.log("Cambios persistidos exitosamente en Firestore.");
-    } catch (err) {
+      setFirestoreStatus("saved");
+      setTimeout(() => {
+        setFirestoreStatus("idle");
+      }, 4000);
+    } catch (err: any) {
       console.error("Error al persistir cambios en Firestore:", err);
+      setFirestoreStatus("error");
+      setFirestoreError(err.message || String(err));
     }
   };
 
@@ -416,6 +425,8 @@ export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [adminActiveTab, setAdminActiveTab] = useState<string>("dashboard");
   const [adminEditingPropertyId, setAdminEditingPropertyId] = useState<string | null>(null);
+  const [firestoreStatus, setFirestoreStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [firestoreError, setFirestoreError] = useState<string | null>(null);
 
   const handleOpenAdminTab = (tab: string) => {
     setAdminActiveTab(tab);
@@ -951,6 +962,8 @@ export default function App() {
           initialTab={adminActiveTab}
           initialEditingPropertyId={adminEditingPropertyId}
           onLoginChange={setIsAdminLoggedIn}
+          firestoreStatus={firestoreStatus}
+          firestoreError={firestoreError}
         />
       )}
     </div>

@@ -251,6 +251,8 @@ interface SuperAdminPanelProps {
   initialTab?: string;
   initialEditingPropertyId?: string | null;
   onLoginChange?: (loggedIn: boolean) => void;
+  firestoreStatus?: "idle" | "saving" | "saved" | "error";
+  firestoreError?: string | null;
 }
 
 export interface AdminLead {
@@ -293,6 +295,8 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
   initialTab,
   initialEditingPropertyId,
   onLoginChange,
+  firestoreStatus = "idle",
+  firestoreError = null,
 }) => {
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -837,6 +841,24 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
                   WordPress Pro
                 </span>
                 <span className="text-xs text-gray-400">v4.2.1</span>
+                {firestoreStatus === "saving" && (
+                  <span className="text-[11px] text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded flex items-center gap-1.5 animate-pulse">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                    Guardando en la nube...
+                  </span>
+                )}
+                {firestoreStatus === "saved" && (
+                  <span className="text-[11px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    Nube sincronizada
+                  </span>
+                )}
+                {firestoreStatus === "error" && (
+                  <span className="text-[11px] text-rose-400 font-bold bg-rose-500/10 px-2 py-0.5 rounded flex items-center gap-1.5" title={firestoreError || ""}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                    Error de nube
+                  </span>
+                )}
               </div>
               <h3 className="text-base md:text-lg font-extrabold tracking-tight">Consola de Control HAVN</h3>
             </div>
@@ -1119,6 +1141,22 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
                   >
                     <CheckCircle className="w-4 h-4" />
                     {successMsg}
+                  </motion.div>
+                )}
+
+                {firestoreStatus === "error" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-400 font-bold flex flex-col gap-1.5"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">⚠️</span>
+                      <span>No se pudieron sincronizar los cambios con la base de datos en la nube.</span>
+                    </div>
+                    <p className="text-xs text-red-300 font-medium pl-6 leading-relaxed">
+                      Detalle del error: {firestoreError || "Error de red, de credenciales o base de datos no inicializada."}
+                    </p>
                   </motion.div>
                 )}
 
