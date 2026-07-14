@@ -252,7 +252,7 @@ export default function App() {
 
   const saveAllToFirestore = async (overrideState: any) => {
     // Only save to Firestore if logged in as admin
-    const isAdmin = localStorage.getItem("havn_admin_session") === "active";
+    const isAdmin = isAdminLoggedIn || localStorage.getItem("havn_admin_session") === "active";
     if (!isAdmin) return;
 
     setFirestoreStatus("saving");
