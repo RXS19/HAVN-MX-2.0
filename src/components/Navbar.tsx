@@ -26,7 +26,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   }, []);
 
   const menuItems = [
-    { label: "Destacadas", id: "properties-section" },
+    { label: "HAVN Premier", id: "premier-section" },
     { label: "Rentas", id: "our-properties-section" },
     { label: "Nuestras Propiedades", id: "our-properties-section" },
     { label: "Financiamiento", id: "financing-section" },

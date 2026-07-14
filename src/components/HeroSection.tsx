@@ -267,7 +267,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         <svg
           viewBox="0 0 1200 120"
           preserveAspectRatio="none"
-          className="relative block w-full h-[35px] md:h-[65px] text-white"
+          className="relative block w-full h-[35px] md:h-[65px] text-slate-50"
           fill="currentColor"
         >
           <path d="M0,0 C300,90 900,90 1200,0 L1200,120 L0,120 Z"></path>

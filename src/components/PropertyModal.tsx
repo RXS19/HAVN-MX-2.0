@@ -58,65 +58,84 @@ export const PropertyModal: React.FC<PropertyModalProps> = ({
             <X className="w-5 h-5" />
           </button>
 
-          {/* Left Column: Property Hero Image Slideshow */}
-          <div className="md:w-1/2 relative h-72 md:h-auto min-h-[350px] bg-slate-100 overflow-hidden group/slider">
-            <motion.img
-              key={currentImageIndex}
-              src={imageList[currentImageIndex]}
-              alt={`${property.title} - Imagen ${currentImageIndex + 1}`}
-              initial={{ opacity: 0, scale: 1.05 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4 }}
-              className="w-full h-full object-cover"
-              referrerPolicy="no-referrer"
-            />
+          {/* Left Column: Property Hero Image Slideshow & Thumbnails */}
+          <div className="md:w-1/2 bg-[#080A0F] flex flex-col justify-between relative overflow-hidden group/slider min-h-[350px] md:min-h-[500px]">
+            {/* Main Image Slider */}
+            <div className="flex-1 relative overflow-hidden bg-[#080A0F] flex items-center justify-center">
+              <motion.img
+                key={currentImageIndex}
+                src={imageList[currentImageIndex]}
+                alt={`${property.title} - Imagen ${currentImageIndex + 1}`}
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4 }}
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
 
-            {/* Slider Controls (Only if multiple images exist) */}
+              {/* Slider Controls (Only if multiple images exist) */}
+              {imageList.length > 1 && (
+                <>
+                  <button
+                    onClick={handlePrevImage}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-white/95 text-brand-bg hover:bg-brand-green hover:text-brand-bg shadow-md transition-all active:scale-90 cursor-pointer opacity-100 md:opacity-0 md:group-hover/slider:opacity-100"
+                    aria-label="Previous image"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={handleNextImage}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-white/95 text-brand-bg hover:bg-brand-green hover:text-brand-bg shadow-md transition-all active:scale-90 cursor-pointer opacity-100 md:opacity-0 md:group-hover/slider:opacity-100"
+                    aria-label="Next image"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </>
+              )}
+
+              {/* Tag Badge */}
+              {property.rawPrice > 5000000 ? (
+                <span className="absolute top-4 left-4 z-10 px-3 py-1 rounded-full text-[10px] font-black tracking-wider shadow-md bg-gradient-to-r from-[#bf953f] via-[#fcf6ba] to-[#aa771c] text-[#080A0F] border border-[#bf953f]/30 uppercase">
+                  Premier
+                </span>
+              ) : (
+                property.tag && (
+                  <span className={`absolute top-4 left-4 z-10 px-3 py-1 rounded-full text-[10px] font-extrabold shadow-sm ${
+                    property.tag.toLowerCase() === "destacada"
+                      ? "bg-brand-green text-brand-bg"
+                      : "bg-white/95 text-brand-bg"
+                  }`}>
+                    {property.tag}
+                  </span>
+                )
+              )}
+            </div>
+
+            {/* Thumbnail Mini-Gallery below main image */}
             {imageList.length > 1 && (
-              <>
-                <button
-                  onClick={handlePrevImage}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-white/95 text-brand-bg hover:bg-brand-green hover:text-brand-bg shadow-md transition-all active:scale-90 cursor-pointer opacity-100 md:opacity-0 md:group-hover/slider:opacity-100"
-                  aria-label="Previous image"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={handleNextImage}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-white/95 text-brand-bg hover:bg-brand-green hover:text-brand-bg shadow-md transition-all active:scale-90 cursor-pointer opacity-100 md:opacity-0 md:group-hover/slider:opacity-100"
-                  aria-label="Next image"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-
-                {/* Dot Indicators */}
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-1.5 bg-black/35 px-3 py-1.5 rounded-full backdrop-blur-sm">
-                  {imageList.map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCurrentImageIndex(idx);
-                      }}
-                      className={`w-2 h-2 rounded-full transition-all cursor-pointer ${
-                        idx === currentImageIndex ? "bg-brand-green w-4" : "bg-white/60 hover:bg-white"
-                      }`}
-                      aria-label={`Ir a imagen ${idx + 1}`}
+              <div className="bg-[#0b0e16] p-3 border-t border-white/5 flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                {imageList.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentImageIndex(idx);
+                    }}
+                    className={`relative w-16 h-12 rounded-lg overflow-hidden flex-shrink-0 transition-all border-2 ${
+                      idx === currentImageIndex 
+                        ? "border-brand-green scale-105" 
+                        : "border-transparent opacity-60 hover:opacity-100"
+                    }`}
+                  >
+                    <img 
+                      src={img} 
+                      alt={`Miniatura ${idx + 1}`} 
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
                     />
-                  ))}
-                </div>
-              </>
-            )}
-
-            {/* Tag Badge */}
-            {property.tag && (
-              <span className={`absolute top-4 left-4 z-10 px-3 py-1 rounded-full text-[10px] font-extrabold shadow-sm ${
-                property.tag.toLowerCase() === "destacada"
-                  ? "bg-brand-green text-brand-bg"
-                  : "bg-white/95 text-brand-bg"
-              }`}>
-                {property.tag}
-              </span>
+                  </button>
+                ))}
+              </div>
             )}
           </div>
 

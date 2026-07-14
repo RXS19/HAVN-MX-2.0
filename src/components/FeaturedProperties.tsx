@@ -107,14 +107,20 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
                     loading="lazy"
                   />
                   {/* Badge */}
-                  {prop.tag && (
-                    <span className={`absolute top-4 left-4 z-10 px-3 py-1 rounded-full text-[10px] font-extrabold shadow-sm ${
-                      prop.tag.toLowerCase() === "destacada"
-                        ? "bg-brand-green text-brand-bg"
-                        : "bg-white/95 text-brand-bg"
-                    }`}>
-                      {prop.tag}
+                  {prop.rawPrice > 5000000 ? (
+                    <span className="absolute top-4 left-4 z-10 px-3 py-1 rounded-full text-[10px] font-black tracking-wider shadow-md bg-gradient-to-r from-[#bf953f] via-[#fcf6ba] to-[#aa771c] text-[#080A0F] border border-[#bf953f]/30 uppercase">
+                      Premier
                     </span>
+                  ) : (
+                    prop.tag && (
+                      <span className={`absolute top-4 left-4 z-10 px-3 py-1 rounded-full text-[10px] font-extrabold shadow-sm ${
+                        prop.tag.toLowerCase() === "destacada"
+                          ? "bg-brand-green text-brand-bg"
+                          : "bg-white/95 text-brand-bg"
+                      }`}>
+                        {prop.tag}
+                      </span>
+                    )
                   )}
 
                   {/* Admin Actions Overlay on Card */}

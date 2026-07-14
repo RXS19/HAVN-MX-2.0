@@ -124,7 +124,7 @@ export const OurProperties: React.FC<OurPropertiesProps> = ({
   }, [properties, activeTag, searchQuery, selectedCity, selectedPriceRange, selectedBeds, sortBy]);
 
   return (
-    <section className="bg-white text-brand-bg py-24 border-t border-slate-100 relative z-20" id="our-properties-section">
+    <section className="bg-slate-50 text-brand-bg py-24 border-t border-slate-100 relative z-20" id="our-properties-section">
       <div className="max-w-7xl mx-auto px-6 md:px-8">
         
         {/* Title Block */}
@@ -369,14 +369,20 @@ export const OurProperties: React.FC<OurPropertiesProps> = ({
                       loading="lazy"
                     />
                     {/* Badge */}
-                    {prop.tag && (
-                      <span className={`absolute top-4 left-4 z-10 px-3 py-1 rounded-full text-[10px] font-extrabold shadow-sm ${
-                        prop.tag.toLowerCase() === "destacada"
-                          ? "bg-brand-green text-brand-bg"
-                          : "bg-white/95 text-brand-bg"
-                      }`}>
-                        {prop.tag}
+                    {prop.rawPrice > 5000000 ? (
+                      <span className="absolute top-4 left-4 z-10 px-3 py-1 rounded-full text-[10px] font-black tracking-wider shadow-md bg-gradient-to-r from-[#bf953f] via-[#fcf6ba] to-[#aa771c] text-[#080A0F] border border-[#bf953f]/30 uppercase">
+                        Premier
                       </span>
+                    ) : (
+                      prop.tag && (
+                        <span className={`absolute top-4 left-4 z-10 px-3 py-1 rounded-full text-[10px] font-extrabold shadow-sm ${
+                          prop.tag.toLowerCase() === "destacada"
+                            ? "bg-brand-green text-brand-bg"
+                            : "bg-white/95 text-brand-bg"
+                        }`}>
+                          {prop.tag}
+                        </span>
+                      )
                     )}
 
                     {/* Admin Actions Overlay on Card */}

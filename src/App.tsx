@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { Undo2, Redo2 } from "lucide-react";
 import { Navbar } from "./components/Navbar";
 import { HeroSection } from "./components/HeroSection";
 import { FeaturedProperties } from "./components/FeaturedProperties";
+import { HavnPremier } from "./components/HavnPremier";
 import { OurProperties } from "./components/OurProperties";
 import { WhyHavn } from "./components/WhyHavn";
 import { ProcessTimeline } from "./components/ProcessTimeline";
@@ -25,6 +27,8 @@ const DEFAULT_PAGE_TEXTS = {
   heroImage: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
   featuredTitle: "Propiedades Destacadas",
   featuredSubtitle: "Explora una selección única de residencias exclusivas y remodelaciones premium con los más altos estándares de diseño en México.",
+  premierTitle: "HAVN Premier",
+  premierSubtitle: "Propiedades exclusivas seleccionadas bajo los más altos estándares de arquitectura, ubicación y plusvalía, superando los $5,000,000 MXN.",
   inventoryTitle: "Nuestras Propiedades",
   inventorySubtitle: "Encuentra la residencia que se adapta a tus necesidades exactas. Filtra por ubicación, precio o distribución con nuestro motor de búsqueda en tiempo real.",
   whyHavnTitle: "¿Por qué HAVN?",
@@ -74,6 +78,7 @@ const DEFAULT_PAGE_TEXTS = {
 
 const DEFAULT_VISIBLE_SECTIONS = {
   hero: true,
+  premier: true,
   featured: true,
   inventory: true,
   whyHavn: true,
@@ -275,6 +280,119 @@ export default function App() {
     }
   };
 
+  // State history snapshot type for administrator Undo/Redo capability
+  interface AdminStateSnapshot {
+    properties: Property[];
+    pageTexts: typeof DEFAULT_PAGE_TEXTS;
+    brandGreenColor: string;
+    brandBgColor: string;
+    selectedFont: string;
+    visibleSections: typeof DEFAULT_VISIBLE_SECTIONS;
+    features: HavnFeature[];
+    steps: ProcessStep[];
+    testimonials: Testimonial[];
+    flipData: typeof FLIP_DATA;
+    financingServices: FinancingService[];
+  }
+
+  const [undoStack, setUndoStack] = useState<AdminStateSnapshot[]>([]);
+  const [redoStack, setRedoStack] = useState<AdminStateSnapshot[]>([]);
+
+  const captureSnapshot = (): AdminStateSnapshot => {
+    return {
+      properties,
+      pageTexts,
+      brandGreenColor,
+      brandBgColor,
+      selectedFont,
+      visibleSections,
+      features,
+      steps,
+      testimonials,
+      flipData,
+      financingServices
+    };
+  };
+
+  const pushToUndo = (currentSnap: AdminStateSnapshot) => {
+    setUndoStack(prev => {
+      const next = [...prev, currentSnap];
+      if (next.length > 50) next.shift(); // Limit size to 50 items
+      return next;
+    });
+    setRedoStack([]);
+  };
+
+  const handleUndo = () => {
+    if (undoStack.length === 0) return;
+    const previousSnap = undoStack[undoStack.length - 1];
+    const currentSnap = captureSnapshot();
+    
+    setProperties(previousSnap.properties);
+    setPageTexts(previousSnap.pageTexts);
+    setBrandGreenColor(previousSnap.brandGreenColor);
+    setBrandBgColor(previousSnap.brandBgColor);
+    setSelectedFont(previousSnap.selectedFont);
+    setVisibleSections(previousSnap.visibleSections);
+    setFeatures(previousSnap.features);
+    setSteps(previousSnap.steps);
+    setTestimonials(previousSnap.testimonials);
+    setFlipData(previousSnap.flipData);
+    setFinancingServices(previousSnap.financingServices);
+    
+    localStorage.setItem("havn_properties", JSON.stringify(previousSnap.properties));
+    localStorage.setItem("havn_page_texts", JSON.stringify(previousSnap.pageTexts));
+    localStorage.setItem("havn_brand_green", previousSnap.brandGreenColor);
+    localStorage.setItem("havn_brand_bg", previousSnap.brandBgColor);
+    localStorage.setItem("havn_selected_font", previousSnap.selectedFont);
+    localStorage.setItem("havn_visible_sections", JSON.stringify(previousSnap.visibleSections));
+    localStorage.setItem("havn_features", JSON.stringify(previousSnap.features));
+    localStorage.setItem("havn_steps", JSON.stringify(previousSnap.steps));
+    localStorage.setItem("havn_testimonials", JSON.stringify(previousSnap.testimonials));
+    localStorage.setItem("havn_flip_data", JSON.stringify(previousSnap.flipData));
+    localStorage.setItem("havn_financing_services", JSON.stringify(previousSnap.financingServices));
+    
+    saveAllToFirestore(previousSnap);
+    
+    setUndoStack(prev => prev.slice(0, -1));
+    setRedoStack(prev => [...prev, currentSnap]);
+  };
+
+  const handleRedo = () => {
+    if (redoStack.length === 0) return;
+    const nextSnap = redoStack[redoStack.length - 1];
+    const currentSnap = captureSnapshot();
+    
+    setProperties(nextSnap.properties);
+    setPageTexts(nextSnap.pageTexts);
+    setBrandGreenColor(nextSnap.brandGreenColor);
+    setBrandBgColor(nextSnap.brandBgColor);
+    setSelectedFont(nextSnap.selectedFont);
+    setVisibleSections(nextSnap.visibleSections);
+    setFeatures(nextSnap.features);
+    setSteps(nextSnap.steps);
+    setTestimonials(nextSnap.testimonials);
+    setFlipData(nextSnap.flipData);
+    setFinancingServices(nextSnap.financingServices);
+    
+    localStorage.setItem("havn_properties", JSON.stringify(nextSnap.properties));
+    localStorage.setItem("havn_page_texts", JSON.stringify(nextSnap.pageTexts));
+    localStorage.setItem("havn_brand_green", nextSnap.brandGreenColor);
+    localStorage.setItem("havn_brand_bg", nextSnap.brandBgColor);
+    localStorage.setItem("havn_selected_font", nextSnap.selectedFont);
+    localStorage.setItem("havn_visible_sections", JSON.stringify(nextSnap.visibleSections));
+    localStorage.setItem("havn_features", JSON.stringify(nextSnap.features));
+    localStorage.setItem("havn_steps", JSON.stringify(nextSnap.steps));
+    localStorage.setItem("havn_testimonials", JSON.stringify(nextSnap.testimonials));
+    localStorage.setItem("havn_flip_data", JSON.stringify(nextSnap.flipData));
+    localStorage.setItem("havn_financing_services", JSON.stringify(nextSnap.financingServices));
+    
+    saveAllToFirestore(nextSnap);
+    
+    setRedoStack(prev => prev.slice(0, -1));
+    setUndoStack(prev => [...prev, currentSnap]);
+  };
+
   // Admin reactive state session (reactive for live customized view)
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
     return localStorage.getItem("havn_admin_session") === "active";
@@ -302,24 +420,28 @@ export default function App() {
 
   // State synchronization with localStorage and Firestore
   const handleUpdateProperties = (newProps: Property[]) => {
+    pushToUndo(captureSnapshot());
     setProperties(newProps);
     localStorage.setItem("havn_properties", JSON.stringify(newProps));
     saveAllToFirestore({ properties: newProps });
   };
 
   const handleResetProperties = () => {
+    pushToUndo(captureSnapshot());
     setProperties(PROPERTIES);
     localStorage.setItem("havn_properties", JSON.stringify(PROPERTIES));
     saveAllToFirestore({ properties: PROPERTIES });
   };
 
   const handleUpdatePageTexts = (newTexts: typeof DEFAULT_PAGE_TEXTS) => {
+    pushToUndo(captureSnapshot());
     setPageTexts(newTexts);
     localStorage.setItem("havn_page_texts", JSON.stringify(newTexts));
     saveAllToFirestore({ pageTexts: newTexts });
   };
 
   const handleResetPageTexts = () => {
+    pushToUndo(captureSnapshot());
     setPageTexts(DEFAULT_PAGE_TEXTS);
     localStorage.setItem("havn_page_texts", JSON.stringify(DEFAULT_PAGE_TEXTS));
     saveAllToFirestore({ pageTexts: DEFAULT_PAGE_TEXTS });
@@ -327,6 +449,7 @@ export default function App() {
 
   // Additional style updaters
   const handleUpdateBranding = (greenColor: string, bgColor: string, fontName: string) => {
+    pushToUndo(captureSnapshot());
     setBrandGreenColor(greenColor);
     setBrandBgColor(bgColor);
     setSelectedFont(fontName);
@@ -341,42 +464,49 @@ export default function App() {
   };
 
   const handleUpdateVisibleSections = (sections: typeof DEFAULT_VISIBLE_SECTIONS) => {
+    pushToUndo(captureSnapshot());
     setVisibleSections(sections);
     localStorage.setItem("havn_visible_sections", JSON.stringify(sections));
     saveAllToFirestore({ visibleSections: sections });
   };
 
   const handleUpdateFeatures = (newFeats: HavnFeature[]) => {
+    pushToUndo(captureSnapshot());
     setFeatures(newFeats);
     localStorage.setItem("havn_features", JSON.stringify(newFeats));
     saveAllToFirestore({ features: newFeats });
   };
 
   const handleUpdateSteps = (newSteps: ProcessStep[]) => {
+    pushToUndo(captureSnapshot());
     setSteps(newSteps);
     localStorage.setItem("havn_steps", JSON.stringify(newSteps));
     saveAllToFirestore({ steps: newSteps });
   };
 
   const handleUpdateTestimonials = (newTestimonials: Testimonial[]) => {
+    pushToUndo(captureSnapshot());
     setTestimonials(newTestimonials);
     localStorage.setItem("havn_testimonials", JSON.stringify(newTestimonials));
     saveAllToFirestore({ testimonials: newTestimonials });
   };
 
   const handleUpdateFlipData = (newData: typeof FLIP_DATA) => {
+    pushToUndo(captureSnapshot());
     setFlipData(newData);
     localStorage.setItem("havn_flip_data", JSON.stringify(newData));
     saveAllToFirestore({ flipData: newData });
   };
 
   const handleUpdateFinancingServices = (newServices: FinancingService[]) => {
+    pushToUndo(captureSnapshot());
     setFinancingServices(newServices);
     localStorage.setItem("havn_financing_services", JSON.stringify(newServices));
     saveAllToFirestore({ financingServices: newServices });
   };
 
   const handleResetAllDesign = () => {
+    pushToUndo(captureSnapshot());
     setBrandGreenColor("#00C389");
     setBrandBgColor("#080A0F");
     setSelectedFont("Plus Jakarta Sans");
@@ -492,8 +622,34 @@ export default function App() {
           </div>
           <div className="flex gap-2">
             <button
+              onClick={handleUndo}
+              disabled={undoStack.length === 0}
+              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all text-[11px] ${
+                undoStack.length === 0 
+                  ? "opacity-30 cursor-not-allowed bg-white/5 text-gray-500" 
+                  : "bg-white/10 hover:bg-white/20 text-white cursor-pointer"
+              }`}
+              title="Deshacer el último cambio (Undo)"
+            >
+              <Undo2 className="w-3.5 h-3.5" />
+              <span className="hidden md:inline">Deshacer</span>
+            </button>
+            <button
+              onClick={handleRedo}
+              disabled={redoStack.length === 0}
+              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all text-[11px] ${
+                redoStack.length === 0 
+                  ? "opacity-30 cursor-not-allowed bg-white/5 text-gray-500" 
+                  : "bg-white/10 hover:bg-white/20 text-white cursor-pointer"
+              }`}
+              title="Rehacer el cambio deshecho (Redo)"
+            >
+              <Redo2 className="w-3.5 h-3.5" />
+              <span className="hidden md:inline">Rehacer</span>
+            </button>
+            <button
               onClick={() => handleOpenAdminTab("dashboard")}
-              className="px-3 py-1 bg-brand-green text-brand-bg rounded-lg font-bold hover:opacity-90 transition-all cursor-pointer"
+              className="px-3 py-1.5 bg-brand-green text-brand-bg rounded-lg font-bold hover:opacity-90 transition-all text-[11px] cursor-pointer"
             >
               Panel de Control (WordPress)
             </button>
@@ -502,7 +658,7 @@ export default function App() {
                 localStorage.removeItem("havn_admin_session");
                 setIsAdminLoggedIn(false);
               }}
-              className="px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all cursor-pointer"
+              className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all text-[11px] cursor-pointer"
             >
               Cerrar Sesión
             </button>
@@ -581,6 +737,21 @@ export default function App() {
           />
         )}
 
+        {/* 2b. HAVN Premier Luxury Properties section (Dark Background) */}
+        {(visibleSections.premier !== undefined ? visibleSections.premier : true) && (
+          <HavnPremier 
+            properties={properties}
+            onPropertySelect={(property) => setSelectedProperty(property)} 
+            onToggleFavorite={handleToggleFavorite}
+            isAdminLoggedIn={isAdminLoggedIn}
+            onEditProperty={handleEditPropertyDirectly}
+            onDeleteProperty={handleDeletePropertyDirectly}
+            title={pageTexts.premierTitle || "HAVN Premier"}
+            subtitle={pageTexts.premierSubtitle || "Propiedades exclusivas seleccionadas bajo los más altos estándares de arquitectura, ubicación y plusvalía, superando los $5,000,000 MXN."}
+            onEditSectionClick={() => handleOpenAdminTab("texts")}
+          />
+        )}
+
         {/* 4. Why HAVN section (Dark background) */}
         {visibleSections.whyHavn && (
           <WhyHavn 
@@ -632,6 +803,17 @@ export default function App() {
           />
         )}
 
+        {/* 9. Elite conversion/Contact form (White background) */}
+        {visibleSections.contact && (
+          <ContactForm 
+            title={pageTexts.contactTitle}
+            subtitle={pageTexts.contactSubtitle}
+            isAdminLoggedIn={isAdminLoggedIn}
+            onEditSectionClick={() => handleOpenAdminTab("texts")}
+            consentText={pageTexts.contactConsentText}
+          />
+        )}
+
         {/* 8. Testimonials carousel (Dark background) */}
         {visibleSections.testimonials && (
           <TestimonialsCarousel 
@@ -641,17 +823,6 @@ export default function App() {
             isAdminLoggedIn={isAdminLoggedIn}
             onEditSectionClick={() => handleOpenAdminTab("texts")}
             onEditTestimonialsClick={() => handleOpenAdminTab("testimonials")}
-          />
-        )}
-
-        {/* 9. Elite conversion/Contact form (White background) */}
-        {visibleSections.contact && (
-          <ContactForm 
-            title={pageTexts.contactTitle}
-            subtitle={pageTexts.contactSubtitle}
-            isAdminLoggedIn={isAdminLoggedIn}
-            onEditSectionClick={() => handleOpenAdminTab("texts")}
-            consentText={pageTexts.contactConsentText}
           />
         )}
 

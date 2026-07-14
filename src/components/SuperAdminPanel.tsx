@@ -6,7 +6,7 @@ import {
   X, Shield, Lock, Save, Plus, Trash2, Edit2, Star, RefreshCw, 
   Layers, CheckCircle2, AlertTriangle, Eye, EyeOff, LayoutDashboard,
   Building2, Type, Sparkles, MessageSquare, Compass, Settings, 
-  Palette, FileText, ArrowRight, Image, Check, CheckCircle, Mail
+  Palette, FileText, ArrowRight, Image, Check, CheckCircle, Mail, Upload
 } from "lucide-react";
 import { Property, Testimonial, ProcessStep, HavnFeature, FinancingService } from "../types";
 import { collection, getDocs, query, orderBy, deleteDoc, doc } from "firebase/firestore";
@@ -22,6 +22,8 @@ interface PageTexts {
   heroImage: string;
   featuredTitle: string;
   featuredSubtitle: string;
+  premierTitle?: string;
+  premierSubtitle?: string;
   inventoryTitle: string;
   inventorySubtitle: string;
   whyHavnTitle: string;
@@ -78,6 +80,8 @@ const DEFAULT_PAGE_TEXTS: PageTexts = {
   heroImage: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
   featuredTitle: "Propiedades Destacadas",
   featuredSubtitle: "Explora una selección única de residencias exclusivas y remodelaciones premium con los más altos estándares de diseño en México.",
+  premierTitle: "HAVN Premier",
+  premierSubtitle: "Propiedades exclusivas seleccionadas bajo los más altos estándares de arquitectura, ubicación y plusvalía, superando los $5,000,000 MXN.",
   inventoryTitle: "Nuestras Propiedades",
   inventorySubtitle: "Encuentra la residencia que se adapta a tus necesidades exactas. Filtra por ubicación, precio o distribución con nuestro motor de búsqueda en tiempo real.",
   whyHavnTitle: "¿Por qué HAVN?",
@@ -195,6 +199,7 @@ export const DEFAULT_MEDIA_ITEMS: MediaItem[] = [
 
 interface VisibleSections {
   hero: boolean;
+  premier?: boolean;
   featured: boolean;
   inventory: boolean;
   whyHavn: boolean;
@@ -364,6 +369,7 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
   const [propSqm, setPropSqm] = useState("120");
   const [propImage, setPropImage] = useState("");
   const [propImagesText, setPropImagesText] = useState("");
+  const [propImages, setPropImages] = useState<string[]>([]);
   const [propTag, setPropTag] = useState("Destacada");
 
   // --- Design / Customizer Local States ---
@@ -424,8 +430,16 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
 
   const [mediaSelectorOpen, setMediaSelectorOpen] = useState(false);
   const [mediaSelectorCallback, setMediaSelectorCallback] = useState<((url: string) => void) | null>(null);
+  const [isMultiSelecting, setIsMultiSelecting] = useState(false);
 
   const openMediaSelector = (callback: (url: string) => void) => {
+    setIsMultiSelecting(false);
+    setMediaSelectorCallback(() => callback);
+    setMediaSelectorOpen(true);
+  };
+
+  const openMultiMediaSelector = (callback: (url: string) => void) => {
+    setIsMultiSelecting(true);
     setMediaSelectorCallback(() => callback);
     setMediaSelectorOpen(true);
   };
@@ -434,8 +448,10 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
     if (mediaSelectorCallback) {
       mediaSelectorCallback(url);
     }
-    setMediaSelectorOpen(false);
-    setMediaSelectorCallback(null);
+    if (!isMultiSelecting) {
+      setMediaSelectorOpen(false);
+      setMediaSelectorCallback(null);
+    }
   };
 
   const saveMediaItems = (items: MediaItem[]) => {
@@ -549,6 +565,7 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
     setPropBaths(prop.baths.toString());
     setPropSqm(prop.sqm.toString());
     setPropImage(prop.image);
+    setPropImages(prop.images || [prop.image]);
     setPropImagesText(prop.images ? prop.images.join(", ") : "");
     setPropTag(prop.tag || "");
     
@@ -568,6 +585,7 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
     setPropBaths("2");
     setPropSqm("120");
     setPropImage("");
+    setPropImages([]);
     setPropImagesText("");
     setPropTag("Destacada");
   };
@@ -610,9 +628,12 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
     }
 
     const priceNum = parseFloat(propRawPrice) || 0;
-    const additionalImages = propImagesText
-      ? propImagesText.split(",").map(u => u.trim()).filter(Boolean)
-      : [propImage];
+    
+    let finalImages = [...propImages];
+    if (propImage && !finalImages.includes(propImage)) {
+      finalImages = [propImage, ...finalImages];
+    }
+    const additionalImages = finalImages.length > 0 ? finalImages : [propImage];
 
     const updatedProp: Property = {
       id: editingPropertyId || `prop_${Date.now()}`,
@@ -1283,28 +1304,158 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
                           />
                         </div>
 
-                        <div>
-                          <div className="flex items-center justify-between mb-1">
-                            <label className="text-xs text-gray-400 font-semibold">Galería de Fotos Adicionales (separadas por comas)</label>
+                        <div className="bg-[#0b0e16] border border-white/5 rounded-2xl p-4 space-y-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-white/5">
+                            <div>
+                              <label className="text-xs text-white font-extrabold flex items-center gap-1.5">
+                                <Sparkles className="w-3.5 h-3.5 text-brand-green" />
+                                Galería de Fotos Adicionales
+                              </label>
+                              <p className="text-[10px] text-gray-400">Anexa múltiples fotos de forma sencilla. El primer elemento será parte del carrusel.</p>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {/* Add from library button */}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  openMultiMediaSelector((url) => {
+                                    setPropImages((prev) => {
+                                      if (prev.includes(url)) return prev;
+                                      return [...prev, url];
+                                    });
+                                  });
+                                }}
+                                className="px-2.5 py-1.5 bg-brand-green/10 border border-brand-green/20 text-brand-green hover:bg-brand-green/20 rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all"
+                              >
+                                <Plus className="w-3 h-3" /> Añadir de Biblioteca
+                              </button>
+
+                              {/* Multi-upload local files button */}
+                              <label className="px-2.5 py-1.5 bg-white/5 border border-white/10 text-white hover:bg-white/10 rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all">
+                                <Upload className="w-3 h-3 text-brand-green" /> Subir Fotos Locales
+                                <input
+                                  type="file"
+                                  multiple
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const files = e.target.files;
+                                    if (!files || files.length === 0) return;
+                                    
+                                    const filesArr = Array.from(files) as File[];
+                                    let loadedCount = 0;
+                                    const newUrls: string[] = [];
+
+                                    filesArr.forEach((file: File) => {
+                                      const reader = new FileReader();
+                                      reader.onload = (event) => {
+                                        const base64Url = event.target?.result as string;
+                                        if (base64Url) {
+                                          newUrls.push(base64Url);
+
+                                          // Also save to global media library
+                                          let sizeStr = `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
+                                          if (file.size < 1024 * 1024) {
+                                            sizeStr = `${(file.size / 1024).toFixed(0)} KB`;
+                                          }
+                                          const newItem: MediaItem = {
+                                            id: `med_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+                                            name: file.name.split('.').slice(0, -1).join('.'),
+                                            url: base64Url,
+                                            type: "image",
+                                            size: sizeStr,
+                                            uploadedAt: new Date().toISOString().split("T")[0]
+                                          };
+                                          setMediaItems(prev => [newItem, ...prev]);
+                                        }
+
+                                        loadedCount++;
+                                        if (loadedCount === filesArr.length) {
+                                          setPropImages(prev => {
+                                            const filtered = newUrls.filter(url => !prev.includes(url));
+                                            return [...prev, ...filtered];
+                                          });
+                                          showSuccess(`¡${filesArr.length} fotos cargadas con éxito!`);
+                                        }
+                                      };
+                                      reader.readAsDataURL(file);
+                                    });
+                                  }}
+                                />
+                              </label>
+                            </div>
+                          </div>
+
+                          {/* Render attached images grid */}
+                          {propImages.length > 0 ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 max-h-[220px] overflow-y-auto p-1">
+                              {propImages.map((imgUrl, imgIdx) => (
+                                <div key={imgIdx} className="relative group/thumb aspect-[4/3] rounded-xl overflow-hidden border border-white/10 bg-slate-950">
+                                  <img 
+                                    src={imgUrl} 
+                                    alt={`Miniatura ${imgIdx + 1}`} 
+                                    className="w-full h-full object-cover"
+                                    referrerPolicy="no-referrer"
+                                  />
+                                  <span className="absolute bottom-1 left-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded-md font-bold">
+                                    #{imgIdx + 1}
+                                  </span>
+                                  {/* Delete Thumbnail Button */}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setPropImages(prev => prev.filter((_, idx) => idx !== imgIdx));
+                                    }}
+                                    className="absolute top-1.5 right-1.5 p-1 rounded-lg bg-red-600/90 text-white hover:bg-red-700 hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer opacity-100 sm:opacity-0 sm:group-hover/thumb:opacity-100"
+                                    title="Quitar foto"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="border border-dashed border-white/10 rounded-xl p-6 text-center text-gray-500 text-xs">
+                              No hay fotos adicionales agregadas. Usa los botones superiores para añadir fotos desde tu computadora o biblioteca de medios sin necesidad de URLs.
+                            </div>
+                          )}
+
+                          {/* Optional: Add photo by URL simply */}
+                          <div className="pt-2 border-t border-white/5 flex gap-2">
+                            <input
+                              type="text"
+                              id="custom-photo-url-input"
+                              placeholder="O pega un enlace de imagen externo aquí..."
+                              className="flex-1 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-[11px] outline-none focus:ring-1 focus:ring-brand-green"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  const input = e.currentTarget;
+                                  const val = input.value.trim();
+                                  if (val) {
+                                    setPropImages(prev => prev.includes(val) ? prev : [...prev, val]);
+                                    input.value = "";
+                                    showSuccess("Enlace agregado a la galería.");
+                                  }
+                                }
+                              }}
+                            />
                             <button
                               type="button"
-                              onClick={() => openMediaSelector((url) => {
-                                const current = propImagesText ? propImagesText.trim() : "";
-                                const next = current ? `${current}, ${url}` : url;
-                                setPropImagesText(next);
-                              })}
-                              className="text-[10px] text-brand-green hover:underline flex items-center gap-1 cursor-pointer"
+                              onClick={() => {
+                                const el = document.getElementById("custom-photo-url-input") as HTMLInputElement;
+                                if (el && el.value.trim()) {
+                                  const val = el.value.trim();
+                                  setPropImages(prev => prev.includes(val) ? prev : [...prev, val]);
+                                  el.value = "";
+                                  showSuccess("Enlace agregado a la galería.");
+                                }
+                              }}
+                              className="px-3 bg-white/5 hover:bg-white/10 text-white text-xs font-bold rounded-lg cursor-pointer border border-white/10 transition-all"
                             >
-                              <Image className="w-3 h-3" /> Añadir desde Biblioteca
+                              Agregar
                             </button>
                           </div>
-                          <textarea
-                            value={propImagesText}
-                            onChange={(e) => setPropImagesText(e.target.value)}
-                            placeholder="URL1, URL2, URL3"
-                            rows={2}
-                            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-xs focus:ring-1 focus:ring-brand-green outline-none"
-                          />
                         </div>
 
                         <div className="flex justify-end gap-2 pt-2">
@@ -1529,6 +1680,30 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
                               type="text"
                               value={textsForm.featuredSubtitle}
                               onChange={(e) => setTextsForm({ ...textsForm, featuredSubtitle: e.target.value })}
+                              className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-xs outline-none focus:ring-1 focus:ring-brand-green"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4 pt-4 border-t border-white/5">
+                        <h5 className="text-xs font-bold text-brand-green uppercase tracking-wider border-b border-white/5 pb-1">2b. Colección HAVN Premier</h5>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-xs text-gray-400 block mb-1">Título</label>
+                            <input
+                              type="text"
+                              value={textsForm.premierTitle || ""}
+                              onChange={(e) => setTextsForm({ ...textsForm, premierTitle: e.target.value })}
+                              className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-xs outline-none focus:ring-1 focus:ring-brand-green"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-gray-400 block mb-1">Descripción</label>
+                            <input
+                              type="text"
+                              value={textsForm.premierSubtitle || ""}
+                              onChange={(e) => setTextsForm({ ...textsForm, premierSubtitle: e.target.value })}
                               className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-xs outline-none focus:ring-1 focus:ring-brand-green"
                             />
                           </div>
@@ -2675,6 +2850,7 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-2">
                         {[
                           { key: "hero", label: "Sección de Bienvenida (Hero)" },
+                          { key: "premier", label: "HAVN Premier (Lujo)" },
                           { key: "featured", label: "Propiedades Destacadas" },
                           { key: "inventory", label: "Nuestras Propiedades (Todas)" },
                           { key: "whyHavn", label: "¿Por qué HAVN? (Beneficios)" },
