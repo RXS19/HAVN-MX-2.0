@@ -272,8 +272,24 @@ export default function App() {
         updatedAt: new Date().toISOString()
       };
 
+      // Recursive helper to clean undefined properties before saving to Firestore
+      const removeUndefined = (obj: any): any => {
+        if (Array.isArray(obj)) {
+          return obj.map(removeUndefined);
+        } else if (obj !== null && typeof obj === 'object') {
+          return Object.entries(obj).reduce((acc: any, [key, val]) => {
+            if (val !== undefined) {
+              acc[key] = removeUndefined(val);
+            }
+            return acc;
+          }, {});
+        }
+        return obj;
+      };
+
+      const sanitizedMerged = removeUndefined(merged);
       const docRef = doc(db, "settings", "main");
-      await setDoc(docRef, merged);
+      await setDoc(docRef, sanitizedMerged);
       console.log("Cambios persistidos exitosamente en Firestore.");
     } catch (err) {
       console.error("Error al persistir cambios en Firestore:", err);

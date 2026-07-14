@@ -1322,7 +1322,7 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
                         </div>
 
                         <div>
-                          <label className="text-xs text-gray-400 block mb-1 font-semibold">Descripción de la Propiedad</label>
+                          <label className="text-xs text-gray-400 block mb-1 font-semibold">Descripción del Inmueble</label>
                           <textarea
                             value={propDescription}
                             onChange={(e) => setPropDescription(e.target.value)}

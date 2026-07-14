@@ -193,7 +193,7 @@ export const PropertyModal: React.FC<PropertyModalProps> = ({
 
               {/* Narrative description */}
               <div className="space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#080A0F]">Descripción de Autor</h4>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#080A0F]">DESCRIPCIÓN DEL INMUEBLE</h4>
                 <p className="text-xs text-gray-500 leading-relaxed font-medium">
                   {property.description || `Ubicado en una de las zonas con mayor exclusividad y plusvalía en ${property.city}. Esta residencia de diseño contemporáneo cuenta con acabados premium cuidadosamente seleccionados, iluminación inteligente integrada, amplias terrazas, y una distribución de espacio impecable orientada al confort y la elegancia.`}
                 </p>
