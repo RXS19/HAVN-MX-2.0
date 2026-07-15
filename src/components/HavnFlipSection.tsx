@@ -20,7 +20,7 @@ interface HavnFlipSectionProps {
 export const HavnFlipSection: React.FC<HavnFlipSectionProps> = ({
   title = "Havn Flip",
   subtitle = "Inversión Inteligente",
-  description = "Adquirimos propiedades en ubicaciones clave con potencial de revalorización, las transformamos con diseño arquitectónico moderno de alta gama en tiempo récord, y las reintroducimos al mercado.",
+  description = "Adquirimos propiedades en ubicaciones clave con potencial de revalorización, las transformamos y las reintroducimos al mercado.",
   detailedDescription = "",
   time = FLIP_DATA.time,
   valueInc = FLIP_DATA.valueInc,

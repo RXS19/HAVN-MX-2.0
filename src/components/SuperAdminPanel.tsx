@@ -13,6 +13,32 @@ import { collection, getDocs, query, orderBy, deleteDoc, doc } from "firebase/fi
 import { db, auth } from "../lib/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
 
+// Safe localStorage wrappers to avoid iframe / security / quota issues
+const safeGetItem = (key: string): string | null => {
+  try {
+    return localStorage.getItem(key);
+  } catch (e) {
+    console.warn("localStorage.getItem blocked or unavailable:", e);
+    return null;
+  }
+};
+
+const safeSetItem = (key: string, value: string): void => {
+  try {
+    localStorage.setItem(key, value);
+  } catch (e) {
+    console.warn("localStorage.setItem blocked or unavailable:", e);
+  }
+};
+
+const safeRemoveItem = (key: string): void => {
+  try {
+    localStorage.removeItem(key);
+  } catch (e) {
+    console.warn("localStorage.removeItem blocked or unavailable:", e);
+  }
+};
+
 interface PageTexts {
   heroTitle1: string;
   heroTitleGreen1: string;
@@ -300,7 +326,7 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
 }) => {
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return localStorage.getItem("havn_admin_session") === "active";
+    return safeGetItem("havn_admin_session") === "active";
   });
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -423,7 +449,7 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
 
   // --- Media Library Local States ---
   const [mediaItems, setMediaItems] = useState<MediaItem[]>(() => {
-    const saved = localStorage.getItem("havn_media_library");
+    const saved = safeGetItem("havn_media_library");
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -462,11 +488,7 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
 
   const saveMediaItems = (items: MediaItem[]) => {
     setMediaItems(items);
-    try {
-      localStorage.setItem("havn_media_library", JSON.stringify(items));
-    } catch (error) {
-      console.warn("Storage full, saved in-memory only:", error);
-    }
+    safeSetItem("havn_media_library", JSON.stringify(items));
   };
 
   const [mediaSearchQuery, setMediaSearchQuery] = useState("");
@@ -510,7 +532,7 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
     setTimeout(() => {
       if (password === "Ricardo19+") {
         setIsLoggedIn(true);
-        localStorage.setItem("havn_admin_session", "active");
+        safeSetItem("havn_admin_session", "active");
         if (onLoginChange) onLoginChange(true);
         showSuccess("¡Sesión iniciada con éxito!");
       } else {
@@ -522,7 +544,7 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
 
   const handleLogout = () => {
     setIsLoggedIn(false);
-    localStorage.removeItem("havn_admin_session");
+    safeRemoveItem("havn_admin_session");
     if (onLoginChange) onLoginChange(false);
   };
 

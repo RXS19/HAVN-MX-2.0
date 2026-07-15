@@ -46,9 +46,11 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Only display properties marked as "Destacada" or "Exclusivo"
-  const featuredListings = properties.filter(
-    (p) => p.tag === "Destacada" || p.tag === "Exclusivo"
-  );
+  const featuredListings = properties.filter((p) => {
+    if (!p.tag) return false;
+    const tagLower = p.tag.toLowerCase();
+    return tagLower === "destacada" || tagLower === "destacadas" || tagLower === "exclusivo" || tagLower === "exclusiva" || tagLower === "exclusivos";
+  });
 
   return (
     <section className="bg-slate-50 text-brand-bg py-24 md:py-32 relative z-20" id="properties-section">

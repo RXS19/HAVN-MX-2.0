@@ -89,6 +89,32 @@ const DEFAULT_VISIBLE_SECTIONS = {
   contact: true
 };
 
+// Safe localStorage wrappers to avoid iframe / security / quota issues
+const safeGetItem = (key: string): string | null => {
+  try {
+    return localStorage.getItem(key);
+  } catch (e) {
+    console.warn("localStorage.getItem blocked or unavailable:", e);
+    return null;
+  }
+};
+
+const safeSetItem = (key: string, value: string): void => {
+  try {
+    localStorage.setItem(key, value);
+  } catch (e) {
+    console.warn("localStorage.setItem blocked or unavailable:", e);
+  }
+};
+
+const safeRemoveItem = (key: string): void => {
+  try {
+    localStorage.removeItem(key);
+  } catch (e) {
+    console.warn("localStorage.removeItem blocked or unavailable:", e);
+  }
+};
+
 export default function App() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
@@ -96,7 +122,7 @@ export default function App() {
 
   // 1. Properties State
   const [properties, setProperties] = useState<Property[]>(() => {
-    const saved = localStorage.getItem("havn_properties");
+    const saved = safeGetItem("havn_properties");
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { console.error(e); }
     }
@@ -105,7 +131,7 @@ export default function App() {
 
   // 2. Page Texts State
   const [pageTexts, setPageTexts] = useState(() => {
-    const saved = localStorage.getItem("havn_page_texts");
+    const saved = safeGetItem("havn_page_texts");
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { console.error(e); }
     }
@@ -114,25 +140,25 @@ export default function App() {
 
   // 3. Brand Colors State
   const [brandGreenColor, setBrandGreenColor] = useState(() => {
-    const saved = localStorage.getItem("havn_brand_green");
+    const saved = safeGetItem("havn_brand_green");
     if (saved === "#3BE37A") {
-      localStorage.setItem("havn_brand_green", "#00C389");
+      safeSetItem("havn_brand_green", "#00C389");
       return "#00C389";
     }
     return saved || "#00C389";
   });
   const [brandBgColor, setBrandBgColor] = useState(() => {
-    return localStorage.getItem("havn_brand_bg") || "#080A0F";
+    return safeGetItem("havn_brand_bg") || "#080A0F";
   });
 
   // 4. Font State
   const [selectedFont, setSelectedFont] = useState(() => {
-    return localStorage.getItem("havn_selected_font") || "Plus Jakarta Sans";
+    return safeGetItem("havn_selected_font") || "Plus Jakarta Sans";
   });
 
   // 5. Visible Sections State
   const [visibleSections, setVisibleSections] = useState(() => {
-    const saved = localStorage.getItem("havn_visible_sections");
+    const saved = safeGetItem("havn_visible_sections");
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { console.error(e); }
     }
@@ -141,7 +167,7 @@ export default function App() {
 
   // 6. Special features/benefits list
   const [features, setFeatures] = useState<HavnFeature[]>(() => {
-    const saved = localStorage.getItem("havn_features");
+    const saved = safeGetItem("havn_features");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -156,7 +182,7 @@ export default function App() {
 
   // 7. Timeline Journey Steps
   const [steps, setSteps] = useState<ProcessStep[]>(() => {
-    const saved = localStorage.getItem("havn_steps");
+    const saved = safeGetItem("havn_steps");
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { console.error(e); }
     }
@@ -165,7 +191,7 @@ export default function App() {
 
   // 8. Testimonials List
   const [testimonials, setTestimonials] = useState<Testimonial[]>(() => {
-    const saved = localStorage.getItem("havn_testimonials");
+    const saved = safeGetItem("havn_testimonials");
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { console.error(e); }
     }
@@ -174,7 +200,7 @@ export default function App() {
 
   // 9. Havn Flip Stats
   const [flipData, setFlipData] = useState(() => {
-    const saved = localStorage.getItem("havn_flip_data");
+    const saved = safeGetItem("havn_flip_data");
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { console.error(e); }
     }
@@ -183,7 +209,7 @@ export default function App() {
 
   // 10. Financing Services State
   const [financingServices, setFinancingServices] = useState<FinancingService[]>(() => {
-    const saved = localStorage.getItem("havn_financing_services");
+    const saved = safeGetItem("havn_financing_services");
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { console.error(e); }
     }
@@ -200,47 +226,47 @@ export default function App() {
           const data = docSnap.data();
           if (data.properties) {
             setProperties(data.properties);
-            localStorage.setItem("havn_properties", JSON.stringify(data.properties));
+            safeSetItem("havn_properties", JSON.stringify(data.properties));
           }
           if (data.pageTexts) {
             setPageTexts(data.pageTexts);
-            localStorage.setItem("havn_page_texts", JSON.stringify(data.pageTexts));
+            safeSetItem("havn_page_texts", JSON.stringify(data.pageTexts));
           }
           if (data.brandGreenColor) {
             setBrandGreenColor(data.brandGreenColor);
-            localStorage.setItem("havn_brand_green", data.brandGreenColor);
+            safeSetItem("havn_brand_green", data.brandGreenColor);
           }
           if (data.brandBgColor) {
             setBrandBgColor(data.brandBgColor);
-            localStorage.setItem("havn_brand_bg", data.brandBgColor);
+            safeSetItem("havn_brand_bg", data.brandBgColor);
           }
           if (data.selectedFont) {
             setSelectedFont(data.selectedFont);
-            localStorage.setItem("havn_selected_font", data.selectedFont);
+            safeSetItem("havn_selected_font", data.selectedFont);
           }
           if (data.visibleSections) {
             setVisibleSections(data.visibleSections);
-            localStorage.setItem("havn_visible_sections", JSON.stringify(data.visibleSections));
+            safeSetItem("havn_visible_sections", JSON.stringify(data.visibleSections));
           }
           if (data.features) {
             setFeatures(data.features);
-            localStorage.setItem("havn_features", JSON.stringify(data.features));
+            safeSetItem("havn_features", JSON.stringify(data.features));
           }
           if (data.steps) {
             setSteps(data.steps);
-            localStorage.setItem("havn_steps", JSON.stringify(data.steps));
+            safeSetItem("havn_steps", JSON.stringify(data.steps));
           }
           if (data.testimonials) {
             setTestimonials(data.testimonials);
-            localStorage.setItem("havn_testimonials", JSON.stringify(data.testimonials));
+            safeSetItem("havn_testimonials", JSON.stringify(data.testimonials));
           }
           if (data.flipData) {
             setFlipData(data.flipData);
-            localStorage.setItem("havn_flip_data", JSON.stringify(data.flipData));
+            safeSetItem("havn_flip_data", JSON.stringify(data.flipData));
           }
           if (data.financingServices) {
             setFinancingServices(data.financingServices);
-            localStorage.setItem("havn_financing_services", JSON.stringify(data.financingServices));
+            safeSetItem("havn_financing_services", JSON.stringify(data.financingServices));
           }
         }
       } catch (err) {
@@ -252,7 +278,7 @@ export default function App() {
 
   const saveAllToFirestore = async (overrideState: any) => {
     // Only save to Firestore if logged in as admin
-    const isAdmin = isAdminLoggedIn || localStorage.getItem("havn_admin_session") === "active";
+    const isAdmin = isAdminLoggedIn || safeGetItem("havn_admin_session") === "active";
     if (!isAdmin) return;
 
     setFirestoreStatus("saving");
@@ -400,17 +426,17 @@ export default function App() {
     setFlipData(nextSnap.flipData);
     setFinancingServices(nextSnap.financingServices);
     
-    localStorage.setItem("havn_properties", JSON.stringify(nextSnap.properties));
-    localStorage.setItem("havn_page_texts", JSON.stringify(nextSnap.pageTexts));
-    localStorage.setItem("havn_brand_green", nextSnap.brandGreenColor);
-    localStorage.setItem("havn_brand_bg", nextSnap.brandBgColor);
-    localStorage.setItem("havn_selected_font", nextSnap.selectedFont);
-    localStorage.setItem("havn_visible_sections", JSON.stringify(nextSnap.visibleSections));
-    localStorage.setItem("havn_features", JSON.stringify(nextSnap.features));
-    localStorage.setItem("havn_steps", JSON.stringify(nextSnap.steps));
-    localStorage.setItem("havn_testimonials", JSON.stringify(nextSnap.testimonials));
-    localStorage.setItem("havn_flip_data", JSON.stringify(nextSnap.flipData));
-    localStorage.setItem("havn_financing_services", JSON.stringify(nextSnap.financingServices));
+    safeSetItem("havn_properties", JSON.stringify(nextSnap.properties));
+    safeSetItem("havn_page_texts", JSON.stringify(nextSnap.pageTexts));
+    safeSetItem("havn_brand_green", nextSnap.brandGreenColor);
+    safeSetItem("havn_brand_bg", nextSnap.brandBgColor);
+    safeSetItem("havn_selected_font", nextSnap.selectedFont);
+    safeSetItem("havn_visible_sections", JSON.stringify(nextSnap.visibleSections));
+    safeSetItem("havn_features", JSON.stringify(nextSnap.features));
+    safeSetItem("havn_steps", JSON.stringify(nextSnap.steps));
+    safeSetItem("havn_testimonials", JSON.stringify(nextSnap.testimonials));
+    safeSetItem("havn_flip_data", JSON.stringify(nextSnap.flipData));
+    safeSetItem("havn_financing_services", JSON.stringify(nextSnap.financingServices));
     
     saveAllToFirestore(nextSnap);
     
@@ -420,7 +446,7 @@ export default function App() {
 
   // Admin reactive state session (reactive for live customized view)
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
-    return localStorage.getItem("havn_admin_session") === "active";
+    return safeGetItem("havn_admin_session") === "active";
   });
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [adminActiveTab, setAdminActiveTab] = useState<string>("dashboard");
@@ -449,28 +475,28 @@ export default function App() {
   const handleUpdateProperties = (newProps: Property[]) => {
     pushToUndo(captureSnapshot());
     setProperties(newProps);
-    localStorage.setItem("havn_properties", JSON.stringify(newProps));
+    safeSetItem("havn_properties", JSON.stringify(newProps));
     saveAllToFirestore({ properties: newProps });
   };
 
   const handleResetProperties = () => {
     pushToUndo(captureSnapshot());
     setProperties(PROPERTIES);
-    localStorage.setItem("havn_properties", JSON.stringify(PROPERTIES));
+    safeSetItem("havn_properties", JSON.stringify(PROPERTIES));
     saveAllToFirestore({ properties: PROPERTIES });
   };
 
   const handleUpdatePageTexts = (newTexts: typeof DEFAULT_PAGE_TEXTS) => {
     pushToUndo(captureSnapshot());
     setPageTexts(newTexts);
-    localStorage.setItem("havn_page_texts", JSON.stringify(newTexts));
+    safeSetItem("havn_page_texts", JSON.stringify(newTexts));
     saveAllToFirestore({ pageTexts: newTexts });
   };
 
   const handleResetPageTexts = () => {
     pushToUndo(captureSnapshot());
     setPageTexts(DEFAULT_PAGE_TEXTS);
-    localStorage.setItem("havn_page_texts", JSON.stringify(DEFAULT_PAGE_TEXTS));
+    safeSetItem("havn_page_texts", JSON.stringify(DEFAULT_PAGE_TEXTS));
     saveAllToFirestore({ pageTexts: DEFAULT_PAGE_TEXTS });
   };
 
@@ -480,9 +506,9 @@ export default function App() {
     setBrandGreenColor(greenColor);
     setBrandBgColor(bgColor);
     setSelectedFont(fontName);
-    localStorage.setItem("havn_brand_green", greenColor);
-    localStorage.setItem("havn_brand_bg", bgColor);
-    localStorage.setItem("havn_selected_font", fontName);
+    safeSetItem("havn_brand_green", greenColor);
+    safeSetItem("havn_brand_bg", bgColor);
+    safeSetItem("havn_selected_font", fontName);
     saveAllToFirestore({
       brandGreenColor: greenColor,
       brandBgColor: bgColor,
@@ -493,42 +519,42 @@ export default function App() {
   const handleUpdateVisibleSections = (sections: typeof DEFAULT_VISIBLE_SECTIONS) => {
     pushToUndo(captureSnapshot());
     setVisibleSections(sections);
-    localStorage.setItem("havn_visible_sections", JSON.stringify(sections));
+    safeSetItem("havn_visible_sections", JSON.stringify(sections));
     saveAllToFirestore({ visibleSections: sections });
   };
 
   const handleUpdateFeatures = (newFeats: HavnFeature[]) => {
     pushToUndo(captureSnapshot());
     setFeatures(newFeats);
-    localStorage.setItem("havn_features", JSON.stringify(newFeats));
+    safeSetItem("havn_features", JSON.stringify(newFeats));
     saveAllToFirestore({ features: newFeats });
   };
 
   const handleUpdateSteps = (newSteps: ProcessStep[]) => {
     pushToUndo(captureSnapshot());
     setSteps(newSteps);
-    localStorage.setItem("havn_steps", JSON.stringify(newSteps));
+    safeSetItem("havn_steps", JSON.stringify(newSteps));
     saveAllToFirestore({ steps: newSteps });
   };
 
   const handleUpdateTestimonials = (newTestimonials: Testimonial[]) => {
     pushToUndo(captureSnapshot());
     setTestimonials(newTestimonials);
-    localStorage.setItem("havn_testimonials", JSON.stringify(newTestimonials));
+    safeSetItem("havn_testimonials", JSON.stringify(newTestimonials));
     saveAllToFirestore({ testimonials: newTestimonials });
   };
 
   const handleUpdateFlipData = (newData: typeof FLIP_DATA) => {
     pushToUndo(captureSnapshot());
     setFlipData(newData);
-    localStorage.setItem("havn_flip_data", JSON.stringify(newData));
+    safeSetItem("havn_flip_data", JSON.stringify(newData));
     saveAllToFirestore({ flipData: newData });
   };
 
   const handleUpdateFinancingServices = (newServices: FinancingService[]) => {
     pushToUndo(captureSnapshot());
     setFinancingServices(newServices);
-    localStorage.setItem("havn_financing_services", JSON.stringify(newServices));
+    safeSetItem("havn_financing_services", JSON.stringify(newServices));
     saveAllToFirestore({ financingServices: newServices });
   };
 
@@ -544,15 +570,15 @@ export default function App() {
     setFlipData(FLIP_DATA);
     setFinancingServices(FINANCING_SERVICES);
     
-    localStorage.removeItem("havn_brand_green");
-    localStorage.removeItem("havn_brand_bg");
-    localStorage.removeItem("havn_selected_font");
-    localStorage.removeItem("havn_visible_sections");
-    localStorage.removeItem("havn_features");
-    localStorage.removeItem("havn_steps");
-    localStorage.removeItem("havn_testimonials");
-    localStorage.removeItem("havn_flip_data");
-    localStorage.removeItem("havn_financing_services");
+    safeRemoveItem("havn_brand_green");
+    safeRemoveItem("havn_brand_bg");
+    safeRemoveItem("havn_selected_font");
+    safeRemoveItem("havn_visible_sections");
+    safeRemoveItem("havn_features");
+    safeRemoveItem("havn_steps");
+    safeRemoveItem("havn_testimonials");
+    safeRemoveItem("havn_flip_data");
+    safeRemoveItem("havn_financing_services");
 
     saveAllToFirestore({
       brandGreenColor: "#00C389",
