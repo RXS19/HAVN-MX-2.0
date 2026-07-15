@@ -288,9 +288,98 @@ export default function App() {
     setFirestoreError(null);
 
     try {
+      // Helper to compress base64 images to avoid 1MB Firestore limit
+      const compressBase64 = (base64Str: string): Promise<string> => {
+        if (!base64Str || !base64Str.startsWith("data:image/")) {
+          return Promise.resolve(base64Str);
+        }
+        // If it's already a very small base64 string, keep it as is
+        if (base64Str.length < 50000) {
+          return Promise.resolve(base64Str);
+        }
+        return new Promise((resolve) => {
+          const img = document.createElement("img");
+          img.src = base64Str;
+          img.onload = () => {
+            try {
+              const canvas = document.createElement("canvas");
+              const maxWidth = 1000;
+              const maxHeight = 1000;
+              let width = img.width;
+              let height = img.height;
+
+              if (width > height) {
+                if (width > maxWidth) {
+                  height = Math.round((height * maxWidth) / width);
+                  width = maxWidth;
+                }
+              } else {
+                if (height > maxHeight) {
+                  width = Math.round((width * maxHeight) / height);
+                  height = maxHeight;
+                }
+              }
+
+              canvas.width = width;
+              canvas.height = height;
+
+              const ctx = canvas.getContext("2d");
+              if (!ctx) {
+                resolve(base64Str);
+                return;
+              }
+
+              ctx.drawImage(img, 0, 0, width, height);
+              const compressed = canvas.toDataURL("image/jpeg", 0.7);
+              resolve(compressed);
+            } catch (e) {
+              console.error("Error in fallback compressBase64:", e);
+              resolve(base64Str);
+            }
+          };
+          img.onerror = () => {
+            resolve(base64Str);
+          };
+        });
+      };
+
+      const rawProperties = overrideState.properties !== undefined ? overrideState.properties : properties;
+      const rawPageTexts = overrideState.pageTexts !== undefined ? overrideState.pageTexts : pageTexts;
+
+      // Compress all property images before saving
+      const compressedProperties = await Promise.all(
+        rawProperties.map(async (prop: Property) => {
+          const mainImage = await compressBase64(prop.image);
+          const additionalImages = prop.images 
+            ? await Promise.all(prop.images.map(img => compressBase64(img)))
+            : undefined;
+          return {
+            ...prop,
+            image: mainImage,
+            images: additionalImages
+          };
+        })
+      );
+
+      // Compress page texts images
+      let compressedPageTexts = { ...rawPageTexts };
+      if (compressedPageTexts.heroImage) {
+        compressedPageTexts.heroImage = await compressBase64(compressedPageTexts.heroImage);
+      }
+
+      // Sync the compressed versions back to React state and local storage
+      if (overrideState.properties !== undefined || rawProperties !== properties) {
+        setProperties(compressedProperties);
+        safeSetItem("havn_properties", JSON.stringify(compressedProperties));
+      }
+      if (overrideState.pageTexts !== undefined || rawPageTexts !== pageTexts) {
+        setPageTexts(compressedPageTexts);
+        safeSetItem("havn_page_texts", JSON.stringify(compressedPageTexts));
+      }
+
       const merged = {
-        properties: overrideState.properties !== undefined ? overrideState.properties : properties,
-        pageTexts: overrideState.pageTexts !== undefined ? overrideState.pageTexts : pageTexts,
+        properties: compressedProperties,
+        pageTexts: compressedPageTexts,
         brandGreenColor: overrideState.brandGreenColor !== undefined ? overrideState.brandGreenColor : brandGreenColor,
         brandBgColor: overrideState.brandBgColor !== undefined ? overrideState.brandBgColor : brandBgColor,
         selectedFont: overrideState.selectedFont !== undefined ? overrideState.selectedFont : selectedFont,
@@ -322,7 +411,7 @@ export default function App() {
       const sanitizedMerged = removeUndefined(merged);
       const docRef = doc(db, "settings", "main");
       await setDoc(docRef, sanitizedMerged);
-      console.log("Cambios persistidos exitosamente en Firestore.");
+      console.log("Cambios persistidos exitosamente en Firestore (con optimización de imágenes).");
       setFirestoreStatus("saved");
       setTimeout(() => {
         setFirestoreStatus("idle");

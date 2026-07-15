@@ -39,6 +39,55 @@ const safeRemoveItem = (key: string): void => {
   }
 };
 
+const compressImage = (base64Str: string, maxWidth = 1000, maxHeight = 1000, quality = 0.7): Promise<string> => {
+  return new Promise((resolve) => {
+    if (!base64Str || !base64Str.startsWith("data:image/")) {
+      resolve(base64Str);
+      return;
+    }
+    const img = document.createElement("img");
+    img.src = base64Str;
+    img.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(base64Str);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressed = canvas.toDataURL("image/jpeg", quality);
+        resolve(compressed);
+      } catch (e) {
+        console.error("Error compressing image:", e);
+        resolve(base64Str);
+      }
+    };
+    img.onerror = () => {
+      resolve(base64Str);
+    };
+  });
+};
+
 interface PageTexts {
   heroTitle1: string;
   heroTitleGreen1: string;
@@ -499,26 +548,39 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
     
     Array.from(files).forEach((file: File) => {
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = async (event) => {
         const base64Url = event.target?.result as string;
         if (!base64Url) return;
+        
+        const isImg = file.type.startsWith("image/");
+        const finalUrl = isImg ? await compressImage(base64Url) : base64Url;
         
         let sizeStr = `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
         if (file.size < 1024 * 1024) {
           sizeStr = `${(file.size / 1024).toFixed(0)} KB`;
         }
+        if (isImg) {
+          const approxLength = finalUrl.length * 0.75;
+          sizeStr = `${(approxLength / (1024 * 1024)).toFixed(2)} MB (comprimido)`;
+          if (approxLength < 1024 * 1024) {
+            sizeStr = `${(approxLength / 1024).toFixed(0)} KB (comprimido)`;
+          }
+        }
 
         const newItem: MediaItem = {
           id: `med_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
           name: file.name.split('.').slice(0, -1).join('.'),
-          url: base64Url,
-          type: file.type.startsWith("image/") ? "image" : file.type.startsWith("video/") ? "video" : "other",
+          url: finalUrl,
+          type: isImg ? "image" : file.type.startsWith("video/") ? "video" : "other",
           size: sizeStr,
           uploadedAt: new Date().toISOString().split("T")[0]
         };
 
-        const updated = [newItem, ...mediaItems];
-        saveMediaItems(updated);
+        setMediaItems((prevItems) => {
+          const updated = [newItem, ...prevItems];
+          safeSetItem("havn_media_library", JSON.stringify(updated));
+          return updated;
+        });
         showSuccess(`¡Archivo "${file.name}" subido con éxito!`);
       };
       reader.readAsDataURL(file);
@@ -1437,25 +1499,31 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
 
                                     filesArr.forEach((file: File) => {
                                       const reader = new FileReader();
-                                      reader.onload = (event) => {
+                                      reader.onload = async (event) => {
                                         const base64Url = event.target?.result as string;
                                         if (base64Url) {
-                                          newUrls.push(base64Url);
+                                          const compressedUrl = await compressImage(base64Url);
+                                          newUrls.push(compressedUrl);
 
                                           // Also save to global media library
-                                          let sizeStr = `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
-                                          if (file.size < 1024 * 1024) {
-                                            sizeStr = `${(file.size / 1024).toFixed(0)} KB`;
+                                          const approxLength = compressedUrl.length * 0.75;
+                                          let sizeStr = `${(approxLength / (1024 * 1024)).toFixed(2)} MB (comprimido)`;
+                                          if (approxLength < 1024 * 1024) {
+                                            sizeStr = `${(approxLength / 1024).toFixed(0)} KB (comprimido)`;
                                           }
                                           const newItem: MediaItem = {
                                             id: `med_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
                                             name: file.name.split('.').slice(0, -1).join('.'),
-                                            url: base64Url,
+                                            url: compressedUrl,
                                             type: "image",
                                             size: sizeStr,
                                             uploadedAt: new Date().toISOString().split("T")[0]
                                           };
-                                          setMediaItems(prev => [newItem, ...prev]);
+                                          setMediaItems(prev => {
+                                            const updated = [newItem, ...prev];
+                                            safeSetItem("havn_media_library", JSON.stringify(updated));
+                                            return updated;
+                                          });
                                         }
 
                                         loadedCount++;
