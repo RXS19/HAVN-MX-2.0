@@ -16,7 +16,7 @@ import { Footer } from "./components/Footer";
 import { SuperAdminPanel } from "./components/SuperAdminPanel";
 import { Property, Testimonial, ProcessStep, HavnFeature, FinancingService } from "./types";
 import { PROPERTIES, TESTIMONIALS, PROCESS_STEPS, HAVN_FEATURES, FLIP_DATA, FINANCING_SERVICES } from "./data";
-import { db, doc, getDoc, setDoc, onSnapshot } from "./lib/firebase";
+import { db, doc, getDoc, setDoc, onSnapshot, collection, getDocs, deleteDoc } from "./lib/firebase";
 
 const DEFAULT_PAGE_TEXTS = {
   heroTitle1: "Tu próximo",
@@ -218,55 +218,83 @@ export default function App() {
 
   // 11. Load persistent settings from Firebase Firestore on mount (with real-time updates)
   useEffect(() => {
-    const docRef = doc(db, "settings", "main");
+    const settingsColl = collection(db, "settings");
     
-    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+    const unsubscribe = onSnapshot(settingsColl, (querySnap) => {
       try {
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.properties) {
-            setProperties(data.properties);
-            safeSetItem("havn_properties", JSON.stringify(data.properties));
+        const loadedProperties: Property[] = [];
+        let hasProperties = false;
+        let mainData: any = null;
+        
+        querySnap.forEach((docSnap) => {
+          if (docSnap.id === "main") {
+            mainData = docSnap.data();
+          } else if (docSnap.id.startsWith("property_")) {
+            hasProperties = true;
+            const propData = docSnap.data();
+            // Remove authorization and metadata fields from the state property
+            const { adminPassword, updatedAt, ...property } = propData;
+            loadedProperties.push(property as Property);
           }
-          if (data.pageTexts) {
-            setPageTexts(data.pageTexts);
-            safeSetItem("havn_page_texts", JSON.stringify(data.pageTexts));
+        });
+
+        if (mainData) {
+          if (mainData.pageTexts) {
+            setPageTexts(mainData.pageTexts);
+            safeSetItem("havn_page_texts", JSON.stringify(mainData.pageTexts));
           }
-          if (data.brandGreenColor) {
-            setBrandGreenColor(data.brandGreenColor);
-            safeSetItem("havn_brand_green", data.brandGreenColor);
+          if (mainData.brandGreenColor) {
+            setBrandGreenColor(mainData.brandGreenColor);
+            safeSetItem("havn_brand_green", mainData.brandGreenColor);
           }
-          if (data.brandBgColor) {
-            setBrandBgColor(data.brandBgColor);
-            safeSetItem("havn_brand_bg", data.brandBgColor);
+          if (mainData.brandBgColor) {
+            setBrandBgColor(mainData.brandBgColor);
+            safeSetItem("havn_brand_bg", mainData.brandBgColor);
           }
-          if (data.selectedFont) {
-            setSelectedFont(data.selectedFont);
-            safeSetItem("havn_selected_font", data.selectedFont);
+          if (mainData.selectedFont) {
+            setSelectedFont(mainData.selectedFont);
+            safeSetItem("havn_selected_font", mainData.selectedFont);
           }
-          if (data.visibleSections) {
-            setVisibleSections(data.visibleSections);
-            safeSetItem("havn_visible_sections", JSON.stringify(data.visibleSections));
+          if (mainData.visibleSections) {
+            setVisibleSections(mainData.visibleSections);
+            safeSetItem("havn_visible_sections", JSON.stringify(mainData.visibleSections));
           }
-          if (data.features) {
-            setFeatures(data.features);
-            safeSetItem("havn_features", JSON.stringify(data.features));
+          if (mainData.features) {
+            setFeatures(mainData.features);
+            safeSetItem("havn_features", JSON.stringify(mainData.features));
           }
-          if (data.steps) {
-            setSteps(data.steps);
-            safeSetItem("havn_steps", JSON.stringify(data.steps));
+          if (mainData.steps) {
+            setSteps(mainData.steps);
+            safeSetItem("havn_steps", JSON.stringify(mainData.steps));
           }
-          if (data.testimonials) {
-            setTestimonials(data.testimonials);
-            safeSetItem("havn_testimonials", JSON.stringify(data.testimonials));
+          if (mainData.testimonials) {
+            setTestimonials(mainData.testimonials);
+            safeSetItem("havn_testimonials", JSON.stringify(mainData.testimonials));
           }
-          if (data.flipData) {
-            setFlipData(data.flipData);
-            safeSetItem("havn_flip_data", JSON.stringify(data.flipData));
+          if (mainData.flipData) {
+            setFlipData(mainData.flipData);
+            safeSetItem("havn_flip_data", JSON.stringify(mainData.flipData));
           }
-          if (data.financingServices) {
-            setFinancingServices(data.financingServices);
-            safeSetItem("havn_financing_services", JSON.stringify(data.financingServices));
+          if (mainData.financingServices) {
+            setFinancingServices(mainData.financingServices);
+            safeSetItem("havn_financing_services", JSON.stringify(mainData.financingServices));
+          }
+
+          // Load properties only if they were initialized in the database
+          const isInitialized = mainData.propertiesInitialized === true;
+          if (isInitialized) {
+            const propertyOrder = mainData.propertyOrder || [];
+            if (propertyOrder.length > 0) {
+              loadedProperties.sort((a, b) => {
+                const idxA = propertyOrder.indexOf(a.id);
+                const idxB = propertyOrder.indexOf(b.id);
+                const valA = idxA === -1 ? 9999 : idxA;
+                const valB = idxB === -1 ? 9999 : idxB;
+                return valA - valB;
+              });
+            }
+            setProperties(loadedProperties);
+            safeSetItem("havn_properties", JSON.stringify(loadedProperties));
           }
         }
       } catch (err) {
@@ -377,23 +405,6 @@ export default function App() {
         safeSetItem("havn_page_texts", JSON.stringify(compressedPageTexts));
       }
 
-      const merged = {
-        properties: compressedProperties,
-        pageTexts: compressedPageTexts,
-        brandGreenColor: overrideState.brandGreenColor !== undefined ? overrideState.brandGreenColor : brandGreenColor,
-        brandBgColor: overrideState.brandBgColor !== undefined ? overrideState.brandBgColor : brandBgColor,
-        selectedFont: overrideState.selectedFont !== undefined ? overrideState.selectedFont : selectedFont,
-        visibleSections: overrideState.visibleSections !== undefined ? overrideState.visibleSections : visibleSections,
-        features: overrideState.features !== undefined ? overrideState.features : features,
-        steps: overrideState.steps !== undefined ? overrideState.steps : steps,
-        testimonials: overrideState.testimonials !== undefined ? overrideState.testimonials : testimonials,
-        flipData: overrideState.flipData !== undefined ? overrideState.flipData : flipData,
-        financingServices: overrideState.financingServices !== undefined ? overrideState.financingServices : financingServices,
-        adminPassword: "Ricardo19+", // Required by Firestore Security Rules to authorize write
-        updatedAt: new Date().toISOString()
-      };
-
-      // Recursive helper to clean undefined properties before saving to Firestore
       const removeUndefined = (obj: any): any => {
         if (Array.isArray(obj)) {
           return obj.map(removeUndefined);
@@ -408,10 +419,62 @@ export default function App() {
         return obj;
       };
 
+      // 1. Fetch all documents in the settings collection to perform a self-cleaning cleanup
+      const querySnap = await getDocs(collection(db, "settings"));
+      const existingPropDocIds: string[] = [];
+      querySnap.forEach((docSnap) => {
+        if (docSnap.id.startsWith("property_")) {
+          existingPropDocIds.push(docSnap.id);
+        }
+      });
+
+      // 2. Identify stale properties to delete
+      const currentPropDocIds = compressedProperties.map(p => `property_${p.id}`);
+      const docsToDelete = existingPropDocIds.filter(id => !currentPropDocIds.includes(id));
+
+      // 3. Delete stale properties
+      await Promise.all(
+        docsToDelete.map(async (docId) => {
+          const docRef = doc(db, "settings", docId);
+          await deleteDoc(docRef);
+        })
+      );
+
+      // 4. Save/update current properties as individual documents under the collection
+      await Promise.all(
+        compressedProperties.map(async (prop) => {
+          const docRef = doc(db, "settings", `property_${prop.id}`);
+          const sanitizedProp = removeUndefined({
+            ...prop,
+            adminPassword: "Ricardo19+",
+            updatedAt: new Date().toISOString()
+          });
+          await setDoc(docRef, sanitizedProp);
+        })
+      );
+
+      // 5. Construct settings/main without properties array to avoid the 1MB document size limit
+      const merged = {
+        propertiesInitialized: true,
+        propertyOrder: compressedProperties.map(p => p.id),
+        pageTexts: compressedPageTexts,
+        brandGreenColor: overrideState.brandGreenColor !== undefined ? overrideState.brandGreenColor : brandGreenColor,
+        brandBgColor: overrideState.brandBgColor !== undefined ? overrideState.brandBgColor : brandBgColor,
+        selectedFont: overrideState.selectedFont !== undefined ? overrideState.selectedFont : selectedFont,
+        visibleSections: overrideState.visibleSections !== undefined ? overrideState.visibleSections : visibleSections,
+        features: overrideState.features !== undefined ? overrideState.features : features,
+        steps: overrideState.steps !== undefined ? overrideState.steps : steps,
+        testimonials: overrideState.testimonials !== undefined ? overrideState.testimonials : testimonials,
+        flipData: overrideState.flipData !== undefined ? overrideState.flipData : flipData,
+        financingServices: overrideState.financingServices !== undefined ? overrideState.financingServices : financingServices,
+        adminPassword: "Ricardo19+", // Required by Firestore Security Rules to authorize write
+        updatedAt: new Date().toISOString()
+      };
+
       const sanitizedMerged = removeUndefined(merged);
       const docRef = doc(db, "settings", "main");
       await setDoc(docRef, sanitizedMerged);
-      console.log("Cambios persistidos exitosamente en Firestore (con optimización de imágenes).");
+      console.log("Cambios persistidos exitosamente en Firestore (con optimización de imágenes y base de datos modular).");
       setFirestoreStatus("saved");
       setTimeout(() => {
         setFirestoreStatus("idle");

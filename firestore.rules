@@ -6,10 +6,10 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Global settings and properties CMS document
-    match /settings/main {
+    // Global settings and properties CMS documents matching any document under settings collection
+    match /settings/{documentId} {
       allow read: if true;
-      allow write: if request.resource.data.adminPassword == "Ricardo19+";
+      allow write: if (request.resource != null && request.resource.data.adminPassword == "Ricardo19+") || (request.resource == null && resource.data.adminPassword == "Ricardo19+");
     }
 
     // Contact submissions leads collection
