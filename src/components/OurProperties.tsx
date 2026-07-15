@@ -255,7 +255,7 @@ export const OurProperties: React.FC<OurPropertiesProps> = ({
                       Estado / Ciudad
                     </label>
                     <div className="flex flex-wrap gap-1.5">
-                      {["Todas", "CDMX", "Nuevo León"].map((city) => (
+                      {["Todas", "CDMX", "Nuevo León", "Estado De México", "Jalisco", "Riviera Maya"].map((city) => (
                         <button
                           key={city}
                           onClick={() => setSelectedCity(city)}

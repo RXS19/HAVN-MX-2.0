@@ -1307,6 +1307,7 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
                             >
                               <option value="CDMX">CDMX</option>
                               <option value="Nuevo León">Nuevo León</option>
+                              <option value="Estado De México">Estado De México</option>
                               <option value="Jalisco">Jalisco</option>
                               <option value="Riviera Maya">Riviera Maya</option>
                             </select>

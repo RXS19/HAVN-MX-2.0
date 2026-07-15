@@ -394,17 +394,17 @@ export default function App() {
     setFlipData(previousSnap.flipData);
     setFinancingServices(previousSnap.financingServices);
     
-    localStorage.setItem("havn_properties", JSON.stringify(previousSnap.properties));
-    localStorage.setItem("havn_page_texts", JSON.stringify(previousSnap.pageTexts));
-    localStorage.setItem("havn_brand_green", previousSnap.brandGreenColor);
-    localStorage.setItem("havn_brand_bg", previousSnap.brandBgColor);
-    localStorage.setItem("havn_selected_font", previousSnap.selectedFont);
-    localStorage.setItem("havn_visible_sections", JSON.stringify(previousSnap.visibleSections));
-    localStorage.setItem("havn_features", JSON.stringify(previousSnap.features));
-    localStorage.setItem("havn_steps", JSON.stringify(previousSnap.steps));
-    localStorage.setItem("havn_testimonials", JSON.stringify(previousSnap.testimonials));
-    localStorage.setItem("havn_flip_data", JSON.stringify(previousSnap.flipData));
-    localStorage.setItem("havn_financing_services", JSON.stringify(previousSnap.financingServices));
+    safeSetItem("havn_properties", JSON.stringify(previousSnap.properties));
+    safeSetItem("havn_page_texts", JSON.stringify(previousSnap.pageTexts));
+    safeSetItem("havn_brand_green", previousSnap.brandGreenColor);
+    safeSetItem("havn_brand_bg", previousSnap.brandBgColor);
+    safeSetItem("havn_selected_font", previousSnap.selectedFont);
+    safeSetItem("havn_visible_sections", JSON.stringify(previousSnap.visibleSections));
+    safeSetItem("havn_features", JSON.stringify(previousSnap.features));
+    safeSetItem("havn_steps", JSON.stringify(previousSnap.steps));
+    safeSetItem("havn_testimonials", JSON.stringify(previousSnap.testimonials));
+    safeSetItem("havn_flip_data", JSON.stringify(previousSnap.flipData));
+    safeSetItem("havn_financing_services", JSON.stringify(previousSnap.financingServices));
     
     saveAllToFirestore(previousSnap);
     
@@ -711,7 +711,7 @@ export default function App() {
             </button>
             <button
               onClick={() => {
-                localStorage.removeItem("havn_admin_session");
+                safeRemoveItem("havn_admin_session");
                 setIsAdminLoggedIn(false);
               }}
               className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all text-[11px] cursor-pointer"
