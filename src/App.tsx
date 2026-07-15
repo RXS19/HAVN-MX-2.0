@@ -16,7 +16,7 @@ import { Footer } from "./components/Footer";
 import { SuperAdminPanel } from "./components/SuperAdminPanel";
 import { Property, Testimonial, ProcessStep, HavnFeature, FinancingService } from "./types";
 import { PROPERTIES, TESTIMONIALS, PROCESS_STEPS, HAVN_FEATURES, FLIP_DATA, FINANCING_SERVICES } from "./data";
-import { db, doc, getDoc, setDoc } from "./lib/firebase";
+import { db, doc, getDoc, setDoc, onSnapshot } from "./lib/firebase";
 
 const DEFAULT_PAGE_TEXTS = {
   heroTitle1: "Tu próximo",
@@ -216,12 +216,12 @@ export default function App() {
     return FINANCING_SERVICES;
   });
 
-  // 11. Load persistent settings from Firebase Firestore on mount
+  // 11. Load persistent settings from Firebase Firestore on mount (with real-time updates)
   useEffect(() => {
-    const loadFromFirestore = async () => {
+    const docRef = doc(db, "settings", "main");
+    
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
       try {
-        const docRef = doc(db, "settings", "main");
-        const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
           if (data.properties) {
@@ -270,10 +270,13 @@ export default function App() {
           }
         }
       } catch (err) {
-        console.error("Error al cargar configuración desde Firestore:", err);
+        console.error("Error al procesar la actualización en tiempo real desde Firestore:", err);
       }
-    };
-    loadFromFirestore();
+    }, (err) => {
+      console.error("Error al suscribirse a la configuración en Firestore:", err);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const saveAllToFirestore = async (overrideState: any) => {

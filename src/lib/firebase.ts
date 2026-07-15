@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { initializeFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+import { initializeFirestore, doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import config from "../../firebase-applet-config.json";
 
@@ -19,4 +19,4 @@ const db = initializeFirestore(app, {
 }, config.firestoreDatabaseId || "(default)");
 const auth = getAuth(app);
 
-export { app, db, auth, doc, getDoc, setDoc };
+export { app, db, auth, doc, getDoc, setDoc, onSnapshot };
