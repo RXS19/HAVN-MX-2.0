@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "motion/react";
-import { ArrowRight, Star, Heart, MapPin, Sparkles } from "lucide-react";
+import { ArrowRight, Star, MapPin, Sparkles } from "lucide-react";
 
 interface HeroSectionProps {
   onBuyClick: () => void;
@@ -207,7 +207,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <h4 className="text-xs md:text-sm font-bold text-white truncate">Loft Orizaba</h4>
             <div className="flex justify-between items-center mt-1 pt-1 border-t border-white/5">
               <span className="text-[11px] md:text-xs font-bold text-white">$8,900,000 MXN</span>
-              <Heart className="w-3.5 h-3.5 text-white/40 group-hover:text-red-500 transition-colors" />
             </div>
           </motion.div>
 
@@ -233,7 +232,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <h4 className="text-xs font-bold text-white truncate">Casa del Parque</h4>
             <div className="flex justify-between items-center mt-1 pt-1 border-t border-white/5">
               <span className="text-[10px] md:text-xs font-bold text-white">$24,500,000 MXN</span>
-              <Heart className="w-3 h-3 text-white/40 group-hover:text-red-500 transition-colors" />
             </div>
           </motion.div>
 

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, SlidersHorizontal, Heart, Bed, ShowerHead, Square, Sparkles, MapPin, ArrowUpDown, RefreshCw, Trash2, Edit, Car } from "lucide-react";
+import { Search, SlidersHorizontal, Bed, ShowerHead, Square, Sparkles, MapPin, ArrowUpDown, RefreshCw, Trash2, Edit, Car } from "lucide-react";
 import { Property } from "../types";
 import { PROPERTIES } from "../data";
 
@@ -428,18 +428,7 @@ export const OurProperties: React.FC<OurPropertiesProps> = ({
                       </div>
                     )}
 
-                    {/* Favorite Button */}
-                    <button
-                      onClick={(e) => onToggleFavorite(prop.id, e)}
-                      className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/90 backdrop-blur-sm border border-white/20 text-gray-400 hover:text-red-500 hover:scale-110 active:scale-95 transition-all shadow-md cursor-pointer"
-                      aria-label="Add to favorites"
-                    >
-                      <Heart
-                        className={`w-4 h-4 transition-all duration-300 ${
-                          prop.isFavorite ? "fill-red-500 text-red-500 scale-110" : "text-gray-400"
-                        }`}
-                      />
-                    </button>
+
                   </div>
 
                   {/* Info Panel */}
