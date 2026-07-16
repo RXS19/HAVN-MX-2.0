@@ -62,17 +62,20 @@ export const OurProperties: React.FC<OurPropertiesProps> = ({
     // Tag filter
     if (activeTag !== "Todas") {
       result = result.filter((p) => {
-        if (!p.tag) return false;
-        const tagLower = p.tag.toLowerCase();
+        const tagLower = (p.tag || "").toLowerCase();
         const activeTagLower = activeTag.toLowerCase();
+        
+        if (activeTagLower === "ventas" || activeTagLower === "venta") {
+          return tagLower !== "renta" && tagLower !== "rentas";
+        }
+        
+        if (!p.tag) return false;
+        
         if (activeTagLower === "destacadas" || activeTagLower === "destacada") {
           return tagLower === "destacada" || tagLower === "destacadas";
         }
         if (activeTagLower === "rentas" || activeTagLower === "renta") {
           return tagLower === "renta" || tagLower === "rentas";
-        }
-        if (activeTagLower === "ventas" || activeTagLower === "venta") {
-          return tagLower === "venta" || tagLower === "ventas";
         }
         return tagLower === activeTagLower || tagLower.includes(activeTagLower);
       });
