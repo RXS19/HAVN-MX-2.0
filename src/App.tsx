@@ -301,8 +301,10 @@ export default function App() {
       } catch (err) {
         console.error("Error al procesar la actualización en tiempo real desde Firestore:", err);
       }
-    }, (err) => {
+    }, (err: any) => {
       console.error("Error al suscribirse a la configuración en Firestore:", err);
+      setFirestoreStatus("error");
+      setFirestoreError(`La base de datos de Firestore ha excedido su límite de cuota diaria o se encuentra offline. La plataforma está operando en Modo Offline de forma segura utilizando los datos locales respaldados en el dispositivo.`);
     });
 
     return () => unsubscribe();
@@ -821,13 +823,29 @@ export default function App() {
       {isAdminLoggedIn && (
         <div className="fixed top-0 left-0 right-0 z-[999] bg-[#0e121a]/95 backdrop-blur-md border-b border-brand-green/20 text-white py-2 px-6 flex justify-between items-center text-xs font-semibold shadow-xl">
           <div className="flex items-center gap-3">
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-green opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-green"></span>
-            </span>
-            <span className="tracking-wide text-brand-green font-bold">Modo Súper Administrador Activo</span>
+            {firestoreStatus === "error" ? (
+              <>
+                <span className="flex h-2 w-2 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                </span>
+                <span className="tracking-wide text-rose-400 font-bold">Modo Offline (Límite de Cuota Firestore Excedido)</span>
+              </>
+            ) : (
+              <>
+                <span className="flex h-2 w-2 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-green opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-green"></span>
+                </span>
+                <span className="tracking-wide text-brand-green font-bold">Modo Súper Administrador Activo</span>
+              </>
+            )}
             <span className="text-white/20 hidden sm:inline">|</span>
-            <span className="text-gray-300 hidden sm:inline">WordPress-Style CMS. Edita textos, imágenes y propiedades en vivo.</span>
+            <span className="text-gray-300 hidden sm:inline">
+              {firestoreStatus === "error" 
+                ? "Los cambios que realices se guardarán de forma local en tu navegador temporalmente."
+                : "WordPress-Style CMS. Edita textos, imágenes y propiedades en vivo."}
+            </span>
           </div>
           <div className="flex gap-2">
             <button
