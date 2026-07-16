@@ -14,6 +14,7 @@ import { ContactForm } from "./components/ContactForm";
 import { PropertyModal } from "./components/PropertyModal";
 import { Footer } from "./components/Footer";
 import { SuperAdminPanel } from "./components/SuperAdminPanel";
+import { Chatbot } from "./components/Chatbot";
 import { Property, Testimonial, ProcessStep, HavnFeature, FinancingService } from "./types";
 import { PROPERTIES, TESTIMONIALS, PROCESS_STEPS, HAVN_FEATURES, FLIP_DATA, FINANCING_SERVICES } from "./data";
 import { db, doc, getDoc, setDoc, onSnapshot, collection, getDocs, deleteDoc } from "./lib/firebase";
@@ -1147,6 +1148,9 @@ export default function App() {
           firestoreError={firestoreError}
         />
       )}
+
+      {/* Chatbot overlay */}
+      <Chatbot properties={properties} brandGreenColor={brandGreenColor} />
     </div>
   );
 }
