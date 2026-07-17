@@ -158,7 +158,7 @@ async function startServer() {
 
   // API route for chatbot
   app.post("/api/chat", async (req, res) => {
-    const { messages, context } = req.body;
+    const { messages, context } = req.body || {};
     if (!messages || !Array.isArray(messages)) {
       res.status(400).json({ error: "Invalid request payload" });
       return;
