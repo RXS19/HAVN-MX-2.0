@@ -57,14 +57,14 @@ export function Chatbot({ properties, brandGreenColor }: ChatbotProps) {
         body: JSON.stringify({
           messages: [...messages, userMessage],
           context: {
-            properties: (properties || []).map((p) => ({
-              title: p?.title || "",
-              price: p?.price || "",
-              location: p?.location || "",
-              bedrooms: p?.beds || (p as any)?.bedrooms || 0,
-              bathrooms: p?.baths || (p as any)?.bathrooms || 0,
-              area: p?.sqm || (p as any)?.area || 0,
-              tag: p?.tag || "",
+            properties: properties.map((p) => ({
+              title: p.title,
+              price: p.price,
+              location: p.location,
+              bedrooms: p.beds,
+              bathrooms: p.baths,
+              area: p.sqm,
+              tag: p.tag,
             })),
           },
         }),

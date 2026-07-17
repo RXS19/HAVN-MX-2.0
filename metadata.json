@@ -1,5 +1,5 @@
 {
-  "name": "HAVN PropTech",
+  "name": "HAVN",
   "description": "Plataforma premium e inteligente para comprar, vender y transformar propiedades en México.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
