@@ -49,7 +49,10 @@ export function Chatbot({ properties, brandGreenColor }: ChatbotProps) {
     setError(null);
 
     try {
-      const response = await fetch("/api/chat", {
+      const baseUrl = typeof window !== "undefined" && window.location ? window.location.origin : "";
+      const fetchUrl = `${baseUrl}/api/chat`;
+
+      const response = await fetch(fetchUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -57,7 +60,7 @@ export function Chatbot({ properties, brandGreenColor }: ChatbotProps) {
         body: JSON.stringify({
           messages: [...messages, userMessage],
           context: {
-            properties: properties.map((p) => ({
+            properties: (properties || []).map((p) => ({
               title: p.title,
               price: p.price,
               location: p.location,
@@ -139,7 +142,7 @@ export function Chatbot({ properties, brandGreenColor }: ChatbotProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.9 }}
             transition={{ type: "spring", damping: 25, stiffness: 350 }}
-            className="absolute bottom-16 right-0 w-[90vw] sm:w-[400px] h-[550px] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="fixed md:absolute bottom-24 md:bottom-16 right-4 md:right-0 w-[calc(100vw-2rem)] md:w-[400px] h-[500px] md:h-[550px] max-h-[75vh] md:max-h-[600px] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">

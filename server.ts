@@ -12,6 +12,18 @@ async function startServer() {
 
   app.use(express.json());
 
+  // CORS middleware: Enable cross-origin resource sharing to prevent blocks on mobile devices, iframes, and alternative domains
+  app.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    if (req.method === "OPTIONS") {
+      res.sendStatus(200);
+      return;
+    }
+    next();
+  });
+
   // Initialize Gemini lazily to avoid crashing on startup if GEMINI_API_KEY is not defined yet
   let aiClient: GoogleGenAI | null = null;
   function getGeminiClient(): GoogleGenAI {
