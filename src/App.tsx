@@ -303,6 +303,15 @@ export default function App() {
       }
     }, (err) => {
       console.error("Error al suscribirse a la configuración en Firestore:", err);
+      setFirestoreStatus("error");
+      const errStr = err instanceof Error ? err.message : String(err);
+      if (errStr.includes("Quota exceeded for quota metric 'Free daily read units per project'") || errStr.toLowerCase().includes("quota limit exceeded") || errStr.toLowerCase().includes("quota exceeded")) {
+        setFirestoreError(
+          "Límite de cuota de lectura diaria superado en Firestore. La cuota gratuita se restablecerá el día de mañana. Puedes ver los detalles, administrar tu base de datos o actualizar tu plan Spark en la Consola de Firebase: https://console.firebase.google.com/project/utility-complex-3n50x/firestore/databases/ai-studio-havnproptech-702a3646-d86e-4ff8-bfa8-0e6cac0ab6a9/data?openUpgradeDialog=true"
+        );
+      } else {
+        setFirestoreError(`Error de Firestore: ${errStr}`);
+      }
     });
 
     return () => unsubscribe();
@@ -828,6 +837,14 @@ export default function App() {
             <span className="tracking-wide text-brand-green font-bold">Modo Súper Administrador Activo</span>
             <span className="text-white/20 hidden sm:inline">|</span>
             <span className="text-gray-300 hidden sm:inline">WordPress-Style CMS. Edita textos, imágenes y propiedades en vivo.</span>
+            {firestoreError && (
+              <>
+                <span className="text-white/20 hidden lg:inline">|</span>
+                <span className="text-amber-400 font-bold hidden lg:flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20" title={firestoreError}>
+                  ⚠️ Límite de Cuota de Lectura Superado (Sincronización en pausa. Tus cambios locales siguen activos).
+                </span>
+              </>
+            )}
           </div>
           <div className="flex gap-2">
             <button

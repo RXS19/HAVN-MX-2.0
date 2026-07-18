@@ -18,7 +18,7 @@ export function Chatbot({ properties, brandGreenColor }: ChatbotProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "¡Hola! Bienvenido a **HAVN**. 🏠✨ Soy **Dave**, tu asesor virtual. ¿En qué puedo ayudarte hoy?\n\nPuedes preguntarme por nuestro inventario, zonas disponibles, o cómo te ayudamos con el financiamiento de tu próxima propiedad.",
+      content: "¡Hola! Bienvenido a **HAVN PropTech**. 🏠✨ Soy **HAVN Bot**, tu asesor virtual. ¿En qué puedo ayudarte hoy?\n\nPuedes preguntarme por nuestro inventario, zonas disponibles, o cómo te ayudamos con el financiamiento de tu próxima propiedad.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -39,17 +39,12 @@ export function Chatbot({ properties, brandGreenColor }: ChatbotProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
-  const handleSend = async (textToSend: string, isRetry = false) => {
+  const handleSend = async (textToSend: string) => {
     if (!textToSend.trim()) return;
     
-    let currentMessages = messages;
-    if (!isRetry) {
-      const userMessage: Message = { role: "user", content: textToSend };
-      currentMessages = [...messages, userMessage];
-      setMessages(currentMessages);
-      setInput("");
-    }
-    
+    const userMessage: Message = { role: "user", content: textToSend };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
     setIsLoading(true);
     setError(null);
 
@@ -60,9 +55,9 @@ export function Chatbot({ properties, brandGreenColor }: ChatbotProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          messages: currentMessages,
+          messages: [...messages, userMessage],
           context: {
-            properties: (properties || []).map((p) => ({
+            properties: properties.map((p) => ({
               title: p.title,
               price: p.price,
               location: p.location,
@@ -144,7 +139,7 @@ export function Chatbot({ properties, brandGreenColor }: ChatbotProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.9 }}
             transition={{ type: "spring", damping: 25, stiffness: 350 }}
-            className="fixed md:absolute bottom-24 md:bottom-16 right-4 md:right-0 w-[calc(100vw-2rem)] md:w-[400px] h-[500px] md:h-[550px] max-h-[75vh] md:max-h-[600px] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="absolute bottom-16 right-0 w-[90vw] sm:w-[400px] h-[550px] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
@@ -157,7 +152,7 @@ export function Chatbot({ properties, brandGreenColor }: ChatbotProps) {
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-sm flex items-center gap-1.5">
-                    Dave
+                    HAVN Bot
                     <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   </h3>
                   <span className="text-[11px] text-slate-400">Asesor de Propiedades & Financiero</span>
@@ -240,7 +235,7 @@ export function Chatbot({ properties, brandGreenColor }: ChatbotProps) {
                     <p className="font-bold">Error de Conexión</p>
                     <p className="mt-0.5 text-[11px] text-red-400/90">{error}</p>
                     <button
-                      onClick={() => handleSend(messages[messages.length - 1]?.content || "", true)}
+                      onClick={() => handleSend(messages[messages.length - 1]?.content || "")}
                       className="mt-2 text-[10px] underline hover:text-white"
                     >
                       Reintentar

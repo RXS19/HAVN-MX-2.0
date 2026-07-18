@@ -410,8 +410,14 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
       // Sort by newest leads first
       leadsList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setLeads(leadsList);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error loading leads:", err);
+      const errStr = err instanceof Error ? err.message : String(err);
+      if (errStr.includes("Quota exceeded for quota metric 'Free daily read units per project'") || errStr.toLowerCase().includes("quota limit exceeded") || errStr.toLowerCase().includes("quota exceeded")) {
+        setErrorMsg("Límite de cuota de lectura diaria superado en Firestore. La cuota se restablecerá mañana. Plan Spark Console: https://console.firebase.google.com/project/utility-complex-3n50x/firestore/databases/ai-studio-havnproptech-702a3646-d86e-4ff8-bfa8-0e6cac0ab6a9/data?openUpgradeDialog=true");
+      } else {
+        setErrorMsg(`Error al cargar leads: ${errStr}`);
+      }
     } finally {
       setIsLoadingLeads(false);
     }
@@ -423,8 +429,10 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
       await deleteDoc(doc(db, "leads", leadId));
       setLeads(leads.filter(l => l.id !== leadId));
       showSuccess("¡Lead de contacto eliminado con éxito!");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error deleting lead:", err);
+      const errStr = err instanceof Error ? err.message : String(err);
+      setErrorMsg(`Error al eliminar lead: ${errStr}`);
     }
   };
 
