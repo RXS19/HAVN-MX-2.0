@@ -79,11 +79,36 @@ Instrucciones de comportamiento:
 4. Mantén tus respuestas concisas pero completas. No generes respuestas excesivamente largas.
 5. Si no sabes la respuesta o es algo muy específico que requiere atención humana, invítalos a dejar sus datos en el formulario de contacto del sitio web.`;
 
-      // Translate message history to Gemini API format
-      const formattedHistory = messages.slice(0, -1).map((m: any) => ({
-        role: m.role === "assistant" ? "model" : "user",
-        parts: [{ text: m.content }]
-      }));
+      // Translate message history to Gemini API format.
+      // We must ensure the history starts with a 'user' turn and strictly alternates.
+      // The initial assistant greeting must be filtered out as history starts with 'user'.
+      let historyMessages = messages.slice(0, -1);
+      
+      const firstUserIdx = historyMessages.findIndex((m: any) => m.role === "user");
+      if (firstUserIdx !== -1) {
+        historyMessages = historyMessages.slice(firstUserIdx);
+      } else {
+        historyMessages = [];
+      }
+
+      // Filter to ensure strictly alternating turns
+      const formattedHistory: any[] = [];
+      let lastRole: string | null = null;
+      for (const m of historyMessages) {
+        const currentRole = m.role === "assistant" ? "model" : "user";
+        if (currentRole !== lastRole) {
+          formattedHistory.push({
+            role: currentRole,
+            parts: [{ text: m.content }]
+          });
+          lastRole = currentRole;
+        }
+      }
+
+      // Ensure the history ends with 'model' (or is empty), so the latest 'user' message alternates correctly
+      if (formattedHistory.length > 0 && formattedHistory[formattedHistory.length - 1].role === "user") {
+        formattedHistory.pop();
+      }
 
       const latestMessage = messages[messages.length - 1]?.content || "";
 

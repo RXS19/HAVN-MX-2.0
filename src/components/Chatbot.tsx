@@ -39,26 +39,28 @@ export function Chatbot({ properties, brandGreenColor }: ChatbotProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
-  const handleSend = async (textToSend: string) => {
+  const handleSend = async (textToSend: string, isRetry = false) => {
     if (!textToSend.trim()) return;
     
-    const userMessage: Message = { role: "user", content: textToSend };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
+    let currentMessages = messages;
+    if (!isRetry) {
+      const userMessage: Message = { role: "user", content: textToSend };
+      currentMessages = [...messages, userMessage];
+      setMessages(currentMessages);
+      setInput("");
+    }
+    
     setIsLoading(true);
     setError(null);
 
     try {
-      const baseUrl = typeof window !== "undefined" && window.location ? window.location.origin : "";
-      const fetchUrl = `${baseUrl}/api/chat`;
-
-      const response = await fetch(fetchUrl, {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          messages: [...messages, userMessage],
+          messages: currentMessages,
           context: {
             properties: (properties || []).map((p) => ({
               title: p.title,
@@ -238,7 +240,7 @@ export function Chatbot({ properties, brandGreenColor }: ChatbotProps) {
                     <p className="font-bold">Error de Conexión</p>
                     <p className="mt-0.5 text-[11px] text-red-400/90">{error}</p>
                     <button
-                      onClick={() => handleSend(messages[messages.length - 1]?.content || "")}
+                      onClick={() => handleSend(messages[messages.length - 1]?.content || "", true)}
                       className="mt-2 text-[10px] underline hover:text-white"
                     >
                       Reintentar
