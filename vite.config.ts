@@ -29,6 +29,7 @@ export default defineConfig(() => {
                 const { default: handler } = await server.ssrLoadModule(apiPath);
 
                 // Adapt Node/Vite request and response objects to match Vercel's API
+                const originalSetHeader = res.setHeader.bind(res);
                 const adaptedReq = Object.assign(req, { body });
                 const adaptedRes = Object.assign(res, {
                   status(statusCode: number) {
@@ -36,11 +37,11 @@ export default defineConfig(() => {
                     return adaptedRes;
                   },
                   setHeader(key: string, value: string) {
-                    res.setHeader(key, value);
+                    originalSetHeader(key, value);
                     return adaptedRes;
                   },
                   json(data: any) {
-                    res.setHeader('Content-Type', 'application/json');
+                    originalSetHeader('Content-Type', 'application/json');
                     res.end(JSON.stringify(data));
                     return adaptedRes;
                   }
