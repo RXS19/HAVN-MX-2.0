@@ -13,7 +13,8 @@ export default defineConfig(() => {
         name: 'local-api-handler',
         configureServer(server) {
           server.middlewares.use(async (req, res, next) => {
-            if (req.url === '/api/chat' && req.method === 'POST') {
+            const matchUrl = req.url?.split('?')[0];
+            if ((matchUrl === '/api/chat' || matchUrl === '/api/contact') && req.method === 'POST') {
               try {
                 // Buffer the request body
                 const buffers: Uint8Array[] = [];
@@ -24,7 +25,8 @@ export default defineConfig(() => {
                 const body = bodyStr ? JSON.parse(bodyStr) : {};
 
                 // Dynamically load the TypeScript API handler
-                const { default: handler } = await server.ssrLoadModule('/api/chat.ts');
+                const apiPath = matchUrl === '/api/chat' ? '/api/chat.ts' : '/api/contact.ts';
+                const { default: handler } = await server.ssrLoadModule(apiPath);
 
                 // Adapt Node/Vite request and response objects to match Vercel's API
                 const adaptedReq = Object.assign(req, { body });

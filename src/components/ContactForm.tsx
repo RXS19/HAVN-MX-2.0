@@ -78,7 +78,26 @@ Este lead ha sido registrado automáticamente en la plataforma de administració
         createdAt: new Date().toISOString()
       });
 
-      // Submit to HubSpot if keys are available
+      // Submit to our secure serverless contact API (for HubSpot Private App Token CRM sync)
+      try {
+        await fetch("/api/contact", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name,
+            email,
+            phone,
+            intent,
+            budget: budget || "No especificado"
+          })
+        });
+      } catch (apiError) {
+        console.error("Error syncing lead with secure endpoint:", apiError);
+      }
+
+      // Submit to HubSpot Form Submissions API if client-side keys are available
       const portalId = (import.meta as any).env.VITE_HUBSPOT_PORTAL_ID;
       const formGuid = (import.meta as any).env.VITE_HUBSPOT_FORM_GUID;
       

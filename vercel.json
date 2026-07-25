@@ -37,6 +37,10 @@
       "destination": "/api/chat.ts"
     },
     {
+      "source": "/api/contact",
+      "destination": "/api/contact.ts"
+    },
+    {
       "source": "/api/:path*",
       "destination": "/api/:path*"
     },
