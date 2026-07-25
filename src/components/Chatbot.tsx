@@ -18,7 +18,7 @@ export function Chatbot({ properties, brandGreenColor }: ChatbotProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "¡Hola! Bienvenido a **HAVN PropTech**. 🏠✨ Soy **HAVN Bot**, tu asesor virtual. ¿En qué puedo ayudarte hoy?\n\nPuedes preguntarme por nuestro inventario, zonas disponibles, o cómo te ayudamos con el financiamiento de tu próxima propiedad.",
+      content: "¡Hola! Bienvenido a **HAVN**. 🏠✨ Soy **Dave**, tu asesor virtual. ¿En qué puedo ayudarte hoy?\n\nPuedes preguntarme por nuestro inventario, zonas disponibles, o cómo te ayudamos con el financiamiento de tu próxima propiedad.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -152,7 +152,7 @@ export function Chatbot({ properties, brandGreenColor }: ChatbotProps) {
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-sm flex items-center gap-1.5">
-                    HAVN Bot
+                    Dave
                     <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   </h3>
                   <span className="text-[11px] text-slate-400">Asesor de Propiedades & Financiero</span>
