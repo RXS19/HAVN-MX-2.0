@@ -84,10 +84,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return;
     }
 
-    const { name, email, phone, intent, budget } = req.body || {};
+    const { name, firstname, lastname, email, phone, intent, budget } = req.body || {};
+
+    const cleanFirstname = (firstname && typeof firstname === "string") ? firstname.trim() : "";
+    const cleanLastname = (lastname && typeof lastname === "string") ? lastname.trim() : "";
+    const cleanName = (name && typeof name === "string") ? name.trim() : `${cleanFirstname} ${cleanLastname}`.trim();
 
     // 4. Input Validation
-    if (!name || typeof name !== "string" || name.trim().length === 0) {
+    if (cleanName.length === 0) {
       res.status(400).json({ error: "El nombre es obligatorio." });
       return;
     }
@@ -100,7 +104,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return;
     }
 
-    const cleanName = name.trim();
     const cleanEmail = email.trim().toLowerCase();
     const cleanPhone = phone.trim();
     const cleanIntent = typeof intent === "string" ? intent : "buy";
@@ -111,21 +114,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let hubspotSyncSuccess = false;
 
     if (hubspotToken) {
-      // Split name into first and last name safely
+      // Split name into first and last name safely or use provided parts
       const nameParts = cleanName.split(/\s+/);
-      const firstname = nameParts[0] || "";
-      const lastname = nameParts.slice(1).join(" ") || "";
+      const hsFirstname = cleanFirstname || nameParts[0] || "";
+      const hsLastname = cleanLastname || nameParts.slice(1).join(" ") || "";
+
+      const intentLabel = 
+        cleanIntent === "buy" ? "Quiero comprar" : 
+        cleanIntent === "rent" ? "Quiero Rentar/Arrendar" : 
+        "Quiero vender";
 
       // Format payload for HubSpot CRM Contacts API v3
       const hubspotPayload = {
         properties: {
           email: cleanEmail,
-          firstname: firstname,
-          lastname: lastname,
+          firstname: hsFirstname,
+          lastname: hsLastname,
           phone: cleanPhone,
           // Custom properties can be created in HubSpot. 
           // To be safe and compatible with all HubSpot default setups, we also save intent/budget into the 'message' or 'notes' fields
-          hs_content_membership_notes: `Interés: ${cleanIntent === "buy" ? "Quiero comprar" : "Quiero vender"}. Presupuesto/Valor: ${cleanBudget}. Código: HAVN-SERIEA-992`,
+          hs_content_membership_notes: `Interés: ${intentLabel}. Presupuesto/Valor: ${cleanBudget}. Código: HAVN-SERIEA-992`,
           website: "https://havn.mx"
         }
       };

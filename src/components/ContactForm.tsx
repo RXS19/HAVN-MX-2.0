@@ -19,8 +19,9 @@ export const ContactForm: React.FC<ContactFormProps> = ({
   onEditSectionClick,
   consentText = "Al enviar, aceptas nuestro Aviso de Privacidad de Datos y autorizas la asignación directa de tu asesor.",
 }) => {
-  const [intent, setIntent] = useState<"buy" | "sell">("buy");
-  const [name, setName] = useState("");
+  const [intent, setIntent] = useState<"buy" | "sell" | "rent">("buy");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [budget, setBudget] = useState("");
@@ -31,13 +32,20 @@ export const ContactForm: React.FC<ContactFormProps> = ({
   const targetEmail = "ventas@havn.com.mx";
   const targetPhone = "+525630412871";
 
+  const fullName = `${firstName} ${lastName}`.trim();
+
   // Build the message text for WhatsApp and Email
   const getWhatsAppLink = () => {
+    const intentLabel = 
+      intent === "buy" ? "Quiero comprar (Comprador)" : 
+      intent === "rent" ? "Quiero Rentar/Arrendar (Arrendatario)" : 
+      "Quiero vender (Vendedor)";
+
     const text = `Hola HAVN, un cliente ha completado el formulario de contacto:
-• Nombre: ${name}
+• Nombre: ${fullName}
 • Correo: ${email}
 • Teléfono: ${phone}
-• Interés: ${intent === "buy" ? "Quiero comprar (Comprador)" : "Quiero vender (Vendedor)"}
+• Interés: ${intentLabel}
 • Rango de presupuesto/valor: ${budget || "No especificado"}
 • Código de prioridad: HAVN-SERIEA-992`;
     // Format target phone strictly as digits for wa.me API
@@ -46,15 +54,21 @@ export const ContactForm: React.FC<ContactFormProps> = ({
   };
 
   const getMailtoLink = () => {
-    const subject = `Nuevo Lead de Contacto HAVN: ${name}`;
+    const intentLabel = 
+      intent === "buy" ? "Quiero comprar (Comprador)" : 
+      intent === "rent" ? "Quiero Rentar/Arrendar (Arrendatario)" : 
+      "Quiero vender (Vendedor)";
+
+    const subject = `Nuevo Lead de Contacto HAVN: ${fullName}`;
     const body = `Hola equipo HAVN,
 
 Se ha completado un nuevo formulario de contacto en la plataforma:
 
-• Nombre Completo: ${name}
+• Nombre: ${firstName}
+• Apellido: ${lastName}
 • Correo Electrónico: ${email}
 • Teléfono de contacto: ${phone}
-• Interés principal: ${intent === "buy" ? "Quiero comprar (Comprador)" : "Quiero vender (Vendedor)"}
+• Interés principal: ${intentLabel}
 • Presupuesto / Valor Estimado: ${budget || "No especificado"}
 • Código de prioridad: HAVN-SERIEA-992
 
@@ -64,13 +78,15 @@ Este lead ha sido registrado automáticamente en la plataforma de administració
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !phone) return;
+    if (!firstName || !lastName || !email || !phone) return;
 
     setIsSubmitting(true);
     try {
       // Save lead details to Firestore leads collection
       await addDoc(collection(db, "leads"), {
-        name,
+        name: fullName,
+        firstName,
+        lastName,
         email,
         phone,
         intent,
@@ -86,7 +102,9 @@ Este lead ha sido registrado automáticamente en la plataforma de administració
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            name,
+            name: fullName,
+            firstname: firstName,
+            lastname: lastName,
             email,
             phone,
             intent,
@@ -105,14 +123,20 @@ Este lead ha sido registrado automáticamente en la plataforma de administració
         // Extract HubSpot tracking UTK from cookie if present
         const hutk = document.cookie.match(/hubspotutk=([^;]+)/)?.[1];
         
+        const intentLabel = 
+          intent === "buy" ? "Quiero comprar (Comprador)" : 
+          intent === "rent" ? "Quiero Rentar/Arrendar (Arrendatario)" : 
+          "Quiero vender (Vendedor)";
+
         const payload = {
           fields: [
-            { name: "firstname", value: name },
+            { name: "firstname", value: firstName },
+            { name: "lastname", value: lastName },
             { name: "email", value: email },
             { name: "phone", value: phone },
-            { name: "intent", value: intent === "buy" ? "Quiero comprar (Comprador)" : "Quiero vender (Vendedor)" },
+            { name: "intent", value: intentLabel },
             { name: "budget", value: budget || "No especificado" },
-            { name: "message", value: `Interés: ${intent === "buy" ? "Quiero comprar" : "Quiero vender"}. Presupuesto/Valor: ${budget || "No especificado"}. Código: HAVN-SERIEA-992` }
+            { name: "message", value: `Interés: ${intentLabel}. Presupuesto/Valor: ${budget || "No especificado"}. Código: HAVN-SERIEA-992` }
           ],
           context: {
             hutk,
@@ -218,7 +242,7 @@ Este lead ha sido registrado automáticamente en la plataforma de administració
                     exit={{ opacity: 0 }}
                     className="space-y-6 text-left"
                   >
-                    {/* Header with toggle buy/sell */}
+                    {/* Header with toggle buy/sell/rent */}
                     <div className="space-y-3">
                       <h3 className="text-xl font-bold text-[#080A0F] font-sans">
                         ¿Cómo podemos ayudarte?
@@ -228,30 +252,42 @@ Este lead ha sido registrado automáticamente en la plataforma de administració
                       </p>
 
                       {/* Dynamic Switcher */}
-                      <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-xl border border-gray-100 mt-4">
+                      <div className="grid grid-cols-3 p-1 bg-slate-100 rounded-xl border border-gray-100 mt-4 gap-1">
                         <button
                           type="button"
-                          onClick={() => setIntent("buy")}
-                          className={`py-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                          onClick={() => { setIntent("buy"); setBudget(""); }}
+                          className={`py-3 px-1 rounded-lg text-xs font-bold transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 cursor-pointer text-center ${
                             intent === "buy"
                               ? "bg-[#080A0F] text-white shadow-sm"
                               : "text-gray-500 hover:text-brand-bg"
                           }`}
                         >
-                          <Building2 className="w-4 h-4" />
-                          Quiero comprar
+                          <Building2 className="w-3.5 h-3.5" />
+                          <span className="truncate">Quiero comprar</span>
                         </button>
                         <button
                           type="button"
-                          onClick={() => setIntent("sell")}
-                          className={`py-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                          onClick={() => { setIntent("rent"); setBudget(""); }}
+                          className={`py-3 px-1 rounded-lg text-xs font-bold transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 cursor-pointer text-center ${
+                            intent === "rent"
+                              ? "bg-[#080A0F] text-white shadow-sm"
+                              : "text-gray-500 hover:text-brand-bg"
+                          }`}
+                        >
+                          <Building2 className="w-3.5 h-3.5 rotate-90" />
+                          <span className="truncate">Quiero Rentar/Arrendar</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { setIntent("sell"); setBudget(""); }}
+                          className={`py-3 px-1 rounded-lg text-xs font-bold transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 cursor-pointer text-center ${
                             intent === "sell"
                               ? "bg-[#080A0F] text-white shadow-sm"
                               : "text-gray-500 hover:text-brand-bg"
                           }`}
                         >
-                          <Landmark className="w-4 h-4" />
-                          Quiero vender
+                          <Landmark className="w-3.5 h-3.5" />
+                          <span className="truncate">Quiero vender</span>
                         </button>
                       </div>
                     </div>
@@ -260,18 +296,46 @@ Este lead ha sido registrado automáticamente en la plataforma de administració
                     <div className="space-y-4 pt-2">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Hidden input to allow HubSpot external forms scraper to read intent selection */}
-                        <input type="hidden" name="intent" value={intent === "buy" ? "Quiero comprar (Comprador)" : "Quiero vender (Vendedor)"} />
+                        <input type="hidden" name="intent" value={intent === "buy" ? "Quiero comprar" : intent === "rent" ? "Quiero Rentar/Arrendar" : "Quiero vender"} />
 
-                        {/* Name */}
+                        {/* First Name */}
                         <div className="space-y-1.5">
-                          <label className="text-xs font-extrabold text-[#080A0F] uppercase tracking-wider">Nombre Completo</label>
+                          <label className="text-xs font-extrabold text-[#080A0F] uppercase tracking-wider">Nombre</label>
                           <input
                             type="text"
                             name="firstname"
                             required
-                            placeholder="Ej. Sofía Pérez"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            placeholder="Ej. Sofía"
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                            className="w-full bg-slate-50 border border-gray-200 focus:border-brand-green/60 rounded-xl px-4 py-3 text-sm text-brand-bg focus:outline-none transition-colors"
+                          />
+                        </div>
+
+                        {/* Last Name */}
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-extrabold text-[#080A0F] uppercase tracking-wider">Apellido</label>
+                          <input
+                            type="text"
+                            name="lastname"
+                            required
+                            placeholder="Ej. Pérez"
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
+                            className="w-full bg-slate-50 border border-gray-200 focus:border-brand-green/60 rounded-xl px-4 py-3 text-sm text-brand-bg focus:outline-none transition-colors"
+                          />
+                        </div>
+
+                        {/* Email */}
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-extrabold text-[#080A0F] uppercase tracking-wider">Correo Electrónico</label>
+                          <input
+                            type="email"
+                            name="email"
+                            required
+                            placeholder="Ej. sofia.perez@empresa.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             className="w-full bg-slate-50 border border-gray-200 focus:border-brand-green/60 rounded-xl px-4 py-3 text-sm text-brand-bg focus:outline-none transition-colors"
                           />
                         </div>
@@ -291,36 +355,34 @@ Este lead ha sido registrado automáticamente en la plataforma de administració
                         </div>
                       </div>
 
-                      {/* Email */}
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-extrabold text-[#080A0F] uppercase tracking-wider">Correo Electrónico</label>
-                        <input
-                          type="email"
-                          name="email"
-                          required
-                          placeholder="Ej. sofia.perez@empresa.com"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="w-full bg-slate-50 border border-gray-200 focus:border-brand-green/60 rounded-xl px-4 py-3 text-sm text-brand-bg focus:outline-none transition-colors"
-                        />
-                      </div>
-
                       {/* Budget / Range */}
                       <div className="space-y-1.5">
                         <label className="text-xs font-extrabold text-[#080A0F] uppercase tracking-wider">
-                          {intent === "buy" ? "Presupuesto Estimado" : "Valor Estimado de tu Propiedad"}
+                          {intent === "buy" ? "Presupuesto Estimado" : intent === "rent" ? "Presupuesto Mensual de Renta" : "Valor Estimado de tu Propiedad"}
                         </label>
                         <select
                           name="budget"
                           value={budget}
                           onChange={(e) => setBudget(e.target.value)}
+                          required
                           className="w-full bg-slate-50 border border-gray-200 focus:border-brand-green/60 rounded-xl px-4 py-3 text-sm text-brand-bg focus:outline-none transition-colors cursor-pointer"
                         >
                           <option value="">Selecciona un rango...</option>
-                          <option value="5m-15m">$5,000,000 MXN - $15,000,000 MXN</option>
-                          <option value="15m-30m">$15,000,000 MXN - $30,000,000 MXN</option>
-                          <option value="30m-50m">$30,000,000 MXN - $50,000,000 MXN</option>
-                          <option value="50m+">Más de $50,000,000 MXN</option>
+                          {intent === "rent" ? (
+                            <>
+                              <option value="bajo-25k">Menos de $25,000 MXN / mes</option>
+                              <option value="25k-50k">$25,000 MXN - $50,000 MXN / mes</option>
+                              <option value="50k-100k">$50,000 MXN - $100,000 MXN / mes</option>
+                              <option value="100k+">Más de $100,000 MXN / mes</option>
+                            </>
+                          ) : (
+                            <>
+                              <option value="5m-15m">$5,000,000 MXN - $15,000,000 MXN</option>
+                              <option value="15m-30m">$15,000,000 MXN - $30,000,000 MXN</option>
+                              <option value="30m-50m">$30,000,000 MXN - $50,000,000 MXN</option>
+                              <option value="50m+">Más de $50,000,000 MXN</option>
+                            </>
+                          )}
                         </select>
                       </div>
                     </div>
@@ -341,7 +403,7 @@ Este lead ha sido registrado automáticamente en la plataforma de administració
                         </>
                       ) : (
                         <>
-                          {intent === "buy" ? "Iniciar proceso de compra" : "Iniciar proceso de venta"}
+                          {intent === "buy" ? "Iniciar proceso de compra" : intent === "rent" ? "Iniciar proceso de renta" : "Iniciar proceso de venta"}
                           <ArrowRight className="w-4 h-4" />
                         </>
                       )}
@@ -366,7 +428,7 @@ Este lead ha sido registrado automáticamente en la plataforma de administració
                         ¡Bienvenido a HAVN!
                       </h3>
                       <p className="text-xs text-gray-500 font-semibold max-w-sm mx-auto leading-relaxed">
-                        Hola <span className="text-[#080A0F] font-bold">{name}</span>, hemos recibido tus datos. Envía tu información para recibir atención inmediata:
+                        Hola <span className="text-[#080A0F] font-bold">{firstName}</span>, hemos recibido tus datos. Envía tu información para recibir atención inmediata:
                       </p>
                     </div>
 
