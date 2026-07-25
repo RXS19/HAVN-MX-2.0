@@ -18,7 +18,7 @@ export function Chatbot({ properties, brandGreenColor }: ChatbotProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "¡Hola! Bienvenido a **HAVN**. 🏠✨ Soy **Dave**, tu asesor virtual. ¿En qué puedo ayudarte hoy?\n\nPuedes preguntarme por nuestro inventario, zonas de cobertura, o sobre nuestras líneas exclusivas **HAVN Flip** y **HAVN Premier**.",
+      content: "¡Hola! Bienvenido a **HAVN**. 🏠✨ Soy **Dave**, tu asesor virtual. ¿En qué puedo ayudarte hoy?",
     },
   ]);
   const [input, setInput] = useState("");
