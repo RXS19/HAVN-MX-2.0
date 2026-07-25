@@ -49,7 +49,8 @@ export function Chatbot({ properties, brandGreenColor }: ChatbotProps) {
     setError(null);
 
     try {
-      const response = await fetch("/api/chat", {
+      const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+      const response = await fetch(`${baseUrl}/api/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -155,7 +156,7 @@ export function Chatbot({ properties, brandGreenColor }: ChatbotProps) {
                     Dave
                     <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   </h3>
-                  <span className="text-[11px] text-slate-400">Asesor de Propiedades & Financiero</span>
+                  <span className="text-[11px] text-slate-400">Asesor Digital</span>
                 </div>
               </div>
               <button
