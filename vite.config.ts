@@ -6,7 +6,58 @@ import {defineConfig} from 'vite';
 export default defineConfig(() => {
   return {
     base: './',
-    plugins: [react(), tailwindcss()],
+    plugins: [
+      react(), 
+      tailwindcss(),
+      {
+        name: 'local-api-handler',
+        configureServer(server) {
+          server.middlewares.use(async (req, res, next) => {
+            if (req.url === '/api/chat' && req.method === 'POST') {
+              try {
+                // Buffer the request body
+                const buffers: Uint8Array[] = [];
+                for await (const chunk of req) {
+                  buffers.push(chunk as Uint8Array);
+                }
+                const bodyStr = Buffer.concat(buffers).toString('utf-8');
+                const body = bodyStr ? JSON.parse(bodyStr) : {};
+
+                // Dynamically load the TypeScript API handler
+                const { default: handler } = await server.ssrLoadModule('/api/chat.ts');
+
+                // Adapt Node/Vite request and response objects to match Vercel's API
+                const adaptedReq = Object.assign(req, { body });
+                const adaptedRes = Object.assign(res, {
+                  status(statusCode: number) {
+                    res.statusCode = statusCode;
+                    return adaptedRes;
+                  },
+                  setHeader(key: string, value: string) {
+                    res.setHeader(key, value);
+                    return adaptedRes;
+                  },
+                  json(data: any) {
+                    res.setHeader('Content-Type', 'application/json');
+                    res.end(JSON.stringify(data));
+                    return adaptedRes;
+                  }
+                });
+
+                await handler(adaptedReq as any, adaptedRes as any);
+              } catch (err: any) {
+                console.error("Local dev API error:", err);
+                res.statusCode = 500;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ error: "Ocurrió un error en el servidor de desarrollo local." }));
+              }
+            } else {
+              next();
+            }
+          });
+        }
+      }
+    ],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
