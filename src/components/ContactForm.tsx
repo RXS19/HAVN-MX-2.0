@@ -46,8 +46,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
 • Correo: ${email}
 • Teléfono: ${phone}
 • Interés: ${intentLabel}
-• Rango de presupuesto/valor: ${budget || "No especificado"}
-• Código de prioridad: HAVN-SERIEA-992`;
+• Rango de presupuesto/valor: ${budget || "No especificado"}`;
     // Format target phone strictly as digits for wa.me API
     const cleanPhone = targetPhone.replace(/\D/g, "");
     return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
@@ -70,7 +69,6 @@ Se ha completado un nuevo formulario de contacto en la plataforma:
 • Teléfono de contacto: ${phone}
 • Interés principal: ${intentLabel}
 • Presupuesto / Valor Estimado: ${budget || "No especificado"}
-• Código de prioridad: HAVN-SERIEA-992
 
 Este lead ha sido registrado automáticamente en la plataforma de administración.`;
     return `mailto:${targetEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -140,7 +138,7 @@ Este lead ha sido registrado automáticamente en la plataforma de administració
             { name: "phone", value: phone },
             { name: "intent", value: intentLabel },
             { name: "budget", value: budget || "No especificado" },
-            { name: "message", value: `Interés: ${intentLabel}. Presupuesto/Valor: ${budget || "No especificado"}. Código: HAVN-SERIEA-992` }
+            { name: "message", value: `Interés: ${intentLabel}. Presupuesto/Valor: ${budget || "No especificado"}` }
           ],
           context: {
             hutk,

@@ -133,7 +133,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           phone: cleanPhone,
           // Custom properties can be created in HubSpot. 
           // To be safe and compatible with all HubSpot default setups, we also save intent/budget into the 'message' or 'notes' fields
-          hs_content_membership_notes: `Interés: ${intentLabel}. Presupuesto/Valor: ${cleanBudget}. Código: HAVN-SERIEA-992`,
+          hs_content_membership_notes: `Interés: ${intentLabel}. Presupuesto/Valor: ${cleanBudget}`,
           website: "https://havn.mx"
         }
       };
