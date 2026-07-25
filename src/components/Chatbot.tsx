@@ -18,7 +18,7 @@ export function Chatbot({ properties, brandGreenColor }: ChatbotProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "¡Hola! Bienvenido a **HAVN**. 🏠✨ Soy **Dave**, tu asesor virtual. ¿En qué puedo ayudarte hoy?\n\nPuedes preguntarme por nuestro inventario, zonas disponibles, o cómo te ayudamos con el financiamiento de tu próxima propiedad.",
+      content: "¡Hola! Bienvenido a **HAVN**. 🏠✨ Soy **Dave**, tu asesor virtual. ¿En qué puedo ayudarte hoy?\n\nPuedes preguntarme por nuestro inventario, zonas de cobertura, o sobre nuestras líneas exclusivas **HAVN Flip** y **HAVN Premier**.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -29,8 +29,8 @@ export function Chatbot({ properties, brandGreenColor }: ChatbotProps) {
 
   const quickQuestions = [
     "¿Qué propiedades tienen disponibles?",
-    "¿Cómo funciona HAVN Capital?",
-    "¿Qué es HAVN Crédito?",
+    "¿Qué es HAVN Flip y cómo funciona?",
+    "¿Qué tipo de propiedades pertenecen a HAVN Premier?",
     "¿Cuáles son las zonas de cobertura?",
   ];
 
@@ -49,8 +49,14 @@ export function Chatbot({ properties, brandGreenColor }: ChatbotProps) {
     setError(null);
 
     try {
-      const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-      const response = await fetch(`${baseUrl}/api/chat`, {
+      let fetchUrl = "/api/chat";
+      if (typeof window !== "undefined") {
+        const origin = window.location.origin;
+        if (origin && origin !== "null" && !origin.startsWith("null")) {
+          fetchUrl = `${origin}/api/chat`;
+        }
+      }
+      const response = await fetch(fetchUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
