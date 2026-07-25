@@ -78,7 +78,11 @@ Este lead ha sido registrado automáticamente en la plataforma de administració
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!firstName || !lastName || !email || !phone) return;
+    console.log("ContactForm: Iniciando envío de lead...", { firstName, lastName, email, phone, intent, budget });
+    if (!firstName || !lastName || !email || !phone) {
+      console.error("ContactForm: Campos obligatorios incompletos", { firstName, lastName, email, phone });
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -364,7 +368,6 @@ Este lead ha sido registrado automáticamente en la plataforma de administració
                           name="budget"
                           value={budget}
                           onChange={(e) => setBudget(e.target.value)}
-                          required
                           className="w-full bg-slate-50 border border-gray-200 focus:border-brand-green/60 rounded-xl px-4 py-3 text-sm text-brand-bg focus:outline-none transition-colors cursor-pointer"
                         >
                           <option value="">Selecciona un rango...</option>

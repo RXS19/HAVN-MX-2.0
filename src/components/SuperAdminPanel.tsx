@@ -335,7 +335,7 @@ export interface AdminLead {
   name: string;
   email: string;
   phone: string;
-  intent: "buy" | "sell";
+  intent: "buy" | "sell" | "rent";
   budget: string;
   createdAt: string;
 }
@@ -3203,7 +3203,7 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
                     </div>
 
                     {/* Stats Summary cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                       <div className="glass p-5 rounded-2xl border border-white/5 bg-white/[0.02]">
                         <span className="text-xs text-gray-400 font-semibold block">Total Leads</span>
                         <span className="text-3xl font-extrabold mt-1 block text-white">{leads.length}</span>
@@ -3215,6 +3215,13 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
                           {leads.filter(l => l.intent === "buy").length}
                         </span>
                         <span className="text-[10px] text-gray-500 font-bold block mt-2">Interés de compra</span>
+                      </div>
+                      <div className="glass p-5 rounded-2xl border border-white/5 bg-white/[0.02]">
+                        <span className="text-xs text-gray-400 font-semibold block">Inquilinos / Rentas</span>
+                        <span className="text-3xl font-extrabold mt-1 block text-blue-400">
+                          {leads.filter(l => l.intent === "rent").length}
+                        </span>
+                        <span className="text-[10px] text-gray-500 font-bold block mt-2">Interés de renta</span>
                       </div>
                       <div className="glass p-5 rounded-2xl border border-white/5 bg-white/[0.02]">
                         <span className="text-xs text-gray-400 font-semibold block">Vendedores</span>
@@ -3278,6 +3285,10 @@ export const SuperAdminPanel: React.FC<SuperAdminPanelProps> = ({
                                     {lead.intent === "buy" ? (
                                       <span className="px-2 py-1 rounded bg-brand-green/10 text-brand-green border border-brand-green/10 text-[10px] font-bold uppercase">
                                         Comprar
+                                      </span>
+                                    ) : lead.intent === "rent" ? (
+                                      <span className="px-2 py-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/10 text-[10px] font-bold uppercase">
+                                        Rentar
                                       </span>
                                     ) : (
                                       <span className="px-2 py-1 rounded bg-amber-500/10 text-amber-500 border border-amber-500/10 text-[10px] font-bold uppercase">
