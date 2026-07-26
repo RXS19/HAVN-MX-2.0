@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Send, Check, Phone, Mail, User, Landmark, Building2, Sparkles, ArrowRight, MessageSquare } from "lucide-react";
+import { Send, Check, Phone, Mail, Landmark, Building2, Sparkles, ArrowRight, MessageSquare } from "lucide-react";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
@@ -208,27 +208,6 @@ Este lead ha sido registrado automáticamente en la plataforma de administració
               </div>
             )}
 
-            <div className="space-y-4 pt-4 border-t border-gray-100">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-slate-100 rounded-xl text-brand-bg shrink-0">
-                  <User className="w-4 h-4 text-brand-green" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-extrabold uppercase text-[#080A0F] tracking-wider">Asignación Directa</h4>
-                  <p className="text-xs text-gray-400 font-semibold">Especialista HAVN asignado</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-slate-100 rounded-xl text-brand-bg shrink-0">
-                  <Mail className="w-4 h-4 text-brand-green" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-extrabold uppercase text-[#080A0F] tracking-wider">Contacto Exclusivo</h4>
-                  <p className="text-xs text-gray-400 font-semibold">contacto@havn.com.mx</p>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* RIGHT: Ultra Premium Conversion Form */}
@@ -455,10 +434,6 @@ Este lead ha sido registrado automáticamente en la plataforma de administració
                     </div>
 
                     <div className="p-4 bg-slate-50 border border-gray-100 rounded-xl text-left max-w-sm mx-auto space-y-1.5 text-xs text-gray-500 font-medium">
-                      <p className="flex justify-between">
-                        <span>Código de prioridad:</span>
-                        <span className="font-bold text-[#080A0F]">HAVN-SERIEA-992</span>
-                      </p>
                       <p className="flex justify-between">
                         <span>Estatus:</span>
                         <span className="font-bold text-brand-green">Especialista Asignándose</span>
